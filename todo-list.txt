@@ -1,0 +1,6 @@
+CryptoChat TODO:
+
+- Allow user to set up local TCP server
+- Establish connections to server with IP, port and password.
+- Port forward if necessary
+- Design GUI
