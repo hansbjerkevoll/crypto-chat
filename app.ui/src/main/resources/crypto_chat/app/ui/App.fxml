@@ -23,7 +23,7 @@
             <VBox alignment="CENTER" maxWidth="200.0" prefWidth="200.0" spacing="5.0">
                <children>
                   <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Host chat server" />
-                  <Button fx:id="addMovieButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Join chat server" />
+                  <Button fx:id="joinServerButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Join chat server" />
                   <Separator prefWidth="200.0">
                      <VBox.margin>
                         <Insets bottom="5.0" top="5.0" />
