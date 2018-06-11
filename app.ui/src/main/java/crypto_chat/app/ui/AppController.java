@@ -1,30 +1,33 @@
 package crypto_chat.app.ui;
 
 import java.io.IOException;
+import java.net.Socket;
 
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.stage.Stage;
+import tcp_server.TCPServer;
 
 public class AppController {
 	
-	@FXML Button joinServerButton;
+	@FXML Button joinServerButton, hostChatButton;
+	
+	public static final int DEFAULT_PORT = 64672;
 	
 	public void initialize(){
 		
+		hostChatButton.setOnAction(ae -> {
+			new Thread(() -> { 
+				TCPServer server = new TCPServer(DEFAULT_PORT);
+				server.start();
+			}).start();
+					
+		});
+		
 		joinServerButton.setOnAction(ae -> {
 			try {
-				Parent parent = FXMLLoader.load(getClass().getResource("host_server/HostServer.fxml"));
-				Stage stage = new Stage();
-				Scene scene = new Scene(parent);
-				stage.setScene(scene);
-				stage.setTitle("Legg til ny film");
-				stage.initOwner(joinServerButton.getScene().getWindow());
-				stage.show();
+				Socket socket = new Socket("localhost", DEFAULT_PORT);
 			} catch (IOException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		});

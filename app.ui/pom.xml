@@ -9,4 +9,12 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   
+  <dependencies>
+  	<dependency>
+  		<groupId>hansbjerkevoll</groupId>
+		<artifactId>crypto-chat.app.core</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+  	</dependency>
+  </dependencies>
+  
 </project>
