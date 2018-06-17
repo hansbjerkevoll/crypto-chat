@@ -30,8 +30,6 @@ public class MainMenuController {
 	
 	@FXML public void initialize(){
 		
-		System.out.println(System.getProperty("user.dir"));
-		
 		hostButton.setOnKeyPressed(ke -> {
 			if (ke.getCode() == KeyCode.ENTER) {
 				hostButton.fire();
