@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="CENTER" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Label text="Chat server (Host)">
+         <font>
+            <Font size="22.0" />
+         </font>
+         <VBox.margin>
+            <Insets top="60.0" />
+         </VBox.margin>
+      </Label>
+      <HBox alignment="CENTER" VBox.vgrow="ALWAYS">
+         <children>
+            <VBox alignment="CENTER" layoutX="310.0" layoutY="10.0" maxWidth="200.0" prefWidth="200.0" spacing="10.0">
+               <children>
+                  <Label fx:id="ip" text="IP-address:" />
+                  <Label fx:id="name" text="Server name:" />
+                  <Label fx:id="port" text="Server port:" />
+                  <Label fx:id="password" text="Server password:" />
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+   </children>
+</VBox>

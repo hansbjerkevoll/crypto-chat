@@ -20,6 +20,7 @@ public class App extends Application{
 		loader.setController(controller);
 		Parent root = loader.load();
 		Scene s = new Scene(root);
+		primaryStage.setTitle("Crypto Chat");
 		primaryStage.setScene(s);
 		primaryStage.show();
 	}
