@@ -1,5 +1,6 @@
 package crypto_chat.app.ui;
 
+import crypto_chat.app.ui.globals.ResourceLocations;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -14,11 +15,13 @@ public class App extends Application{
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		Parent root = FXMLLoader.load(getClass().getResource("App.fxml"));
-		primaryStage.setScene(new Scene(root));
-		primaryStage.setTitle("Crypto Chat");
+		FXMLLoader loader = new FXMLLoader(getClass().getResource(ResourceLocations.FXML_MAIN_MENU));
+		MainMenuController controller = new MainMenuController(primaryStage);
+		loader.setController(controller);
+		Parent root = loader.load();
+		Scene s = new Scene(root);
+		primaryStage.setScene(s);
 		primaryStage.show();
-		
 	}
 
 }
