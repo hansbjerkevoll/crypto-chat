@@ -10,9 +10,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
+import crypto_chat.app.core.globals.ResourceLocations;
 import crypto_chat.app.ui.admin.AdminMenuController;
 import crypto_chat.app.ui.client.JoinServerController;
-import crypto_chat.app.ui.globals.ResourceLocations;
 import crypto_chat.app.ui.host.HostServerController;
 
 public class MainMenuController {

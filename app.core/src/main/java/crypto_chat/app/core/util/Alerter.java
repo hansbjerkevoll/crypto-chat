@@ -1,4 +1,4 @@
-package crypto_chat.app.ui.util;
+package crypto_chat.app.core.util;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

@@ -1,4 +1,4 @@
-package crypto_chat.app.ui.globals;
+package crypto_chat.app.core.globals;
 
 public class ResourceLocations {
 	public static final String FXML_MAIN_MENU = "MainMenu.fxml";

@@ -1,6 +1,6 @@
 package crypto_chat.app.ui;
 
-import crypto_chat.app.ui.globals.ResourceLocations;
+import crypto_chat.app.core.globals.ResourceLocations;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;

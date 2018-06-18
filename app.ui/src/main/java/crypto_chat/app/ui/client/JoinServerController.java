@@ -3,9 +3,10 @@ package crypto_chat.app.ui.client;
 import java.io.IOException;
 import java.net.Socket;
 
-import crypto_chat.app.ui.globals.NetworkDefaults;
-import crypto_chat.app.ui.util.Alerter;
-import crypto_chat.app.ui.util.TimedTask;
+import crypto_chat.app.core.client.ClientSocketHandler;
+import crypto_chat.app.core.globals.NetworkDefaults;
+import crypto_chat.app.core.util.Alerter;
+import crypto_chat.app.core.util.TimedTask;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;

@@ -1,4 +1,4 @@
-package crypto_chat.app.ui.globals;
+package crypto_chat.app.core.globals;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
