@@ -6,6 +6,9 @@ import java.net.ServerSocket;
 import crypto_chat.app.ui.globals.NetworkDefaults;
 import crypto_chat.app.ui.globals.ResourceLocations;
 import crypto_chat.app.ui.util.Alerter;
+import crypto_chat.app.ui.util.TimedTask;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -16,6 +19,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class HostServerController {
 	
@@ -43,11 +47,13 @@ public class HostServerController {
 		addValidateListener(serverPortField);
 		
 		hostButton.setOnAction(ae -> {
-			disableGUI();
-			updateStatusLabel("Connecting...", true);
+			disableGUI(true);
+			updateStatusLabel("Setting up server...", "DarkOrange");
 			if(!establishConnection(serverNameField.getText(), serverPasswordField.getText(), serverPortField.getText())) {
-				enableGUI();
-				updateStatusLabel("Ready to connect...", false);
+				TimedTask.runLater(Duration.millis(500), () -> {
+					disableGUI(false);
+					updateStatusLabel("Ready to host server...", "DarkGreen");
+				});
 			};
 		});
 		
@@ -72,6 +78,21 @@ public class HostServerController {
 			if (mainMenuScene != null) {
 				((Stage) cancelButton.getScene().getWindow()).setScene(mainMenuScene);
 			}
+		});
+		
+		serverPortField.textProperty().addListener(new ChangeListener<String>() {
+		    @Override
+		    public void changed(ObservableValue<? extends String> observable, String oldValue, 
+		        String newValue) {
+		    	String fieldText = serverPortField.getText();
+		        if (!newValue.matches("[0-9]")) {
+		        	fieldText = newValue.replaceAll("[^0-9]", "");
+		        }
+		        if(newValue.length() > 5) {
+		        	fieldText = newValue.substring(0, 5);
+		        }
+		        serverPortField.setText(fieldText);
+		    }
 		});
 	}
 	
@@ -108,8 +129,7 @@ public class HostServerController {
 			return false;
 		}
 		Scene s = new Scene(root);
-		myStage.setScene(s);
-		myStage.centerOnScreen();
+		myStage.setScene(s);	
 		
 		return true;
 	}
@@ -129,27 +149,18 @@ public class HostServerController {
 		});
 	}
 	
-	private void disableGUI() {
-		serverNameField.setDisable(true);
-		serverPasswordField.setDisable(true);
-		serverPortField.setDisable(true);
-		portCheckbox.setDisable(true);
-		hostButton.setDisable(true);
-		cancelButton.setDisable(true);
+	private void disableGUI(boolean disable) {
+		serverNameField.setDisable(disable);
+		serverPasswordField.setDisable(disable);
+		serverPortField.setDisable(disable);
+		portCheckbox.setDisable(disable);
+		hostButton.setDisable(disable);
+		cancelButton.setDisable(disable);
 	}
 	
-	private void enableGUI() {
-		serverNameField.setDisable(false);
-		serverPasswordField.setDisable(false);
-		serverPortField.setDisable(false);
-		portCheckbox.setDisable(portCheckbox.isSelected());
-		hostButton.setDisable(false);
-		cancelButton.setDisable(false);
-	}
-	
-	private void updateStatusLabel(String text, boolean connecting) {
+	private void updateStatusLabel(String text, String color) {
 		statusLabel.setText(text);
-		statusLabel.setStyle(connecting ? "-fx-text-fill:DarkOrange" : "-fx-text-fill:DarkGreen");
+		statusLabel.setStyle("-fx-text-fill:"+color);
 	}
 	
 	public void setMainMenuScene(Scene scene) {

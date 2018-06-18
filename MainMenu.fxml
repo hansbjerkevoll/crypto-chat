@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="CENTER" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Label text="Crypto Chat">
+         <font>
+            <Font size="22.0" />
+         </font>
+         <VBox.margin>
+            <Insets top="60.0" />
+         </VBox.margin>
+      </Label>
+      <HBox alignment="CENTER" VBox.vgrow="ALWAYS">
+         <children>
+            <VBox alignment="CENTER" maxWidth="200.0" prefWidth="200.0" spacing="10.0">
+               <children>
+                  <Button fx:id="hostButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Host chat server" />
+                  <Button fx:id="joinButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Join chat server" />
+                  <Separator prefWidth="200.0">
+                     <VBox.margin>
+                        <Insets bottom="5.0" top="5.0" />
+                     </VBox.margin>
+                  </Separator>
+                  <Button fx:id="adminButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Administration">
+                     <VBox.margin>
+                        <Insets />
+                     </VBox.margin>
+                  </Button>
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+   </children>
+</VBox>

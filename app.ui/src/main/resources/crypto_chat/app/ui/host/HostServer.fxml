@@ -21,7 +21,7 @@
             <Insets top="60.0" />
          </VBox.margin>
       </Label>
-      <Label fx:id="statusLabel" text="Ready to connect..." textFill="DARKGREEN">
+      <Label fx:id="statusLabel" text="Ready to host..." textFill="DARKGREEN">
          <VBox.margin>
             <Insets top="5.0" />
          </VBox.margin>

@@ -21,6 +21,11 @@
             <Insets top="60.0" />
          </VBox.margin>
       </Label>
+      <Label fx:id="statusLabel" text="Ready to connect..." textFill="DARKGREEN">
+         <VBox.margin>
+            <Insets top="5.0" />
+         </VBox.margin>
+      </Label>
       <HBox alignment="CENTER" VBox.vgrow="ALWAYS">
          <children>
             <VBox alignment="CENTER_LEFT" maxWidth="200.0" prefWidth="200.0" spacing="10.0">
