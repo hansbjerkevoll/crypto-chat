@@ -8,9 +8,9 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<VBox alignment="CENTER" prefHeight="750.0" prefWidth="950.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <Label text="Admin">
+      <Label text="Administration">
          <font>
             <Font size="22.0" />
          </font>
@@ -20,8 +20,9 @@
       </Label>
       <HBox alignment="CENTER" VBox.vgrow="ALWAYS">
          <children>
-            <VBox alignment="CENTER" maxWidth="200.0" prefWidth="200.0" spacing="5.0">
+            <VBox alignment="CENTER" maxWidth="200.0" prefWidth="200.0" spacing="10.0">
                <children>
+                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Port forwarding" />
                   <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Change client names" />
                   <Separator prefWidth="200.0">
                      <VBox.margin>

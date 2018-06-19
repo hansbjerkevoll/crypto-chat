@@ -3,7 +3,6 @@ package crypto_chat.app.ui.client;
 import java.io.IOException;
 import java.net.Socket;
 
-import crypto_chat.app.core.client.ClientSocketHandler;
 import crypto_chat.app.core.globals.NetworkDefaults;
 import crypto_chat.app.core.util.Alerter;
 import crypto_chat.app.core.util.TimedTask;
@@ -118,6 +117,24 @@ public class JoinServerController {
 		        }
 		        serverPortField.setText(fieldText);
 		    }
+		});
+		
+		serverIPField.setOnKeyPressed(ke -> {
+			if (ke.getCode() == KeyCode.ENTER) {
+				connectButton.fire();
+			}
+		});
+		
+		serverPasswordField.setOnKeyPressed(ke -> {
+			if (ke.getCode() == KeyCode.ENTER) {
+				connectButton.fire();
+			}
+		});
+		
+		serverPortField.setOnKeyPressed(ke -> {
+			if (ke.getCode() == KeyCode.ENTER) {
+				connectButton.fire();
+			}
 		});
 	}
 	

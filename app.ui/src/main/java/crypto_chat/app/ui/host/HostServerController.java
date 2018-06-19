@@ -36,7 +36,7 @@ public class HostServerController {
 	}
 	
 	@FXML public void initialize() {
-		
+				
 		serverPortField.setText(NetworkDefaults.PORT);
 		serverPortField.setDisable(true);
 		portCheckbox.setSelected(true);
@@ -77,6 +77,24 @@ public class HostServerController {
 		cancelButton.setOnAction(ae -> {
 			if (mainMenuScene != null) {
 				((Stage) cancelButton.getScene().getWindow()).setScene(mainMenuScene);
+			}
+		});
+		
+		serverNameField.setOnKeyPressed(ke -> {
+			if (ke.getCode() == KeyCode.ENTER) {
+				hostButton.fire();
+			}
+		});
+		
+		serverPasswordField.setOnKeyPressed(ke -> {
+			if (ke.getCode() == KeyCode.ENTER) {
+				hostButton.fire();
+			}
+		});
+		
+		serverPortField.setOnKeyPressed(ke -> {
+			if (ke.getCode() == KeyCode.ENTER) {
+				hostButton.fire();
 			}
 		});
 		

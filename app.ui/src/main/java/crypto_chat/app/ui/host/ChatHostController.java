@@ -7,12 +7,23 @@ import java.net.URL;
 import java.util.Scanner;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class ChatHostController {
 	
-	@FXML Label ip, name, port, password;
+	@FXML TextField serverIPField, serverPortField, serverShownPassword;
+	@FXML PasswordField serverHiddenPassword;
+	@FXML Button toChatButton;
+	@FXML Label serverNameLabel;
+	@FXML TableView<String> tableviewClients;
+	@FXML TableColumn<String, String> tablecolumnName, tableviewIP;
 	
 	Stage myStage;
 	
@@ -29,6 +40,32 @@ public class ChatHostController {
 	
 	public void initialize() {
 		
+		serverIPField.setText(getExternalIP());
+		serverPortField.setText(Integer.toString(serverSocket.getLocalPort()));
+		serverHiddenPassword.setText(serverPassword);
+		serverShownPassword.setText(serverPassword);
+		serverNameLabel.setText(serverName);
+		
+		serverShownPassword.setVisible(false);
+		serverShownPassword.setManaged(false);
+		
+		serverHiddenPassword.setOnMouseEntered(me -> {
+			serverShownPassword.setVisible(true);
+			serverShownPassword.setManaged(true);
+			serverHiddenPassword.setVisible(false);
+			serverHiddenPassword.setManaged(false);
+		});
+		
+		serverShownPassword.setOnMouseExited(me -> {
+			serverShownPassword.setVisible(false);
+			serverShownPassword.setManaged(false);
+			serverHiddenPassword.setVisible(true);
+			serverHiddenPassword.setManaged(true);
+		});
+				
+	}
+		
+	private String getExternalIP() {
 		// Attempt to retrieve external IP from Amazon AWS
 		String ip_text = "unknown";
 		try (Scanner sc = new Scanner(new URL("http://checkip.amazonaws.com/").openStream(), "UTF-8")) {
@@ -41,11 +78,7 @@ public class ChatHostController {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		ip.setText("IP-address: " + ip_text);
-		port.setText("Server port: " + serverSocket.getLocalPort());
-		name.setText("Server name: " + serverName);
-		password.setText("Server password: " + serverPassword);
+		return ip_text;
 	}
 
 }
