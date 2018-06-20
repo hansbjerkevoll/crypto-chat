@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
@@ -59,9 +60,9 @@
             <Insets top="5.0" />
          </VBox.margin>
       </Label>
-      <HBox alignment="CENTER">
+      <HBox alignment="CENTER" spacing="10.0">
          <children>
-            <VBox prefWidth="500.0" spacing="5.0">
+            <VBox prefWidth="400.0" spacing="5.0">
                <padding>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="10.0" />
                </padding>
@@ -77,6 +78,15 @@
                      </columnResizePolicy>
                   </TableView>
                </children>
+            </VBox>
+            <VBox spacing="5.0">
+               <children>
+                  <Label text="Recent updates:" />
+                  <ListView fx:id="listviewUpdates" prefHeight="500.0" prefWidth="400.0" />
+               </children>
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="10.0" />
+               </padding>
             </VBox>
          </children>
       </HBox>

@@ -9,6 +9,7 @@ import java.util.Scanner;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -24,6 +25,7 @@ public class ChatHostController {
 	@FXML Label serverNameLabel;
 	@FXML TableView<String> tableviewClients;
 	@FXML TableColumn<String, String> tablecolumnName, tableviewIP;
+	@FXML ListView<String> listviewUpdates;
 	
 	Stage myStage;
 	
@@ -50,10 +52,10 @@ public class ChatHostController {
 		serverShownPassword.setManaged(false);
 		
 		serverHiddenPassword.setOnMouseEntered(me -> {
-			serverShownPassword.setVisible(true);
-			serverShownPassword.setManaged(true);
 			serverHiddenPassword.setVisible(false);
 			serverHiddenPassword.setManaged(false);
+			serverShownPassword.setVisible(true);
+			serverShownPassword.setManaged(true);
 		});
 		
 		serverShownPassword.setOnMouseExited(me -> {
@@ -79,6 +81,18 @@ public class ChatHostController {
 			e.printStackTrace();
 		}
 		return ip_text;
+	}
+	
+	public void offerClient(ObservableClient client) {
+		
+	}
+	
+	public void gotMessageFromClient(ClientThread clientThread) {
+		
+	}
+	
+	public void removeClient(ObservableClient observableClient) {
+		
 	}
 
 }

@@ -53,16 +53,18 @@ public class JoinServerController {
 			}
 		});
 		
-		connectButton.setOnAction(ae -> {			
+		connectButton.setOnAction(ae -> {		
+			
 			disableGUI(true);
-			updateStatusLabel("Connecting to " + serverIPField.getText() + ":" + serverPortField.getText() + "...", "DarkOrange");
+			updateStatusLabel("Connecting to " + serverIPField.getText() + ":" + serverPortField.getText() + "...", "DarkOrange");	
 			
 			if(!establishConnection(serverIPField.getText(), serverPortField.getText(), serverPasswordField.getText())) {
 				TimedTask.runLater(Duration.millis(500), () -> {
 					disableGUI(false);
 					updateStatusLabel("Ready to connect to server...", "DarkGreen");
 				});
-			}
+			}			
+			
 		});
 		
 		cancelButton.setOnKeyPressed(ke -> {
