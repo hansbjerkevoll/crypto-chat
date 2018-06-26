@@ -21,6 +21,7 @@ public class App extends Application{
 		Parent root = loader.load();
 		Scene s = new Scene(root);
 		primaryStage.setTitle("Crypto Chat");
+		primaryStage.setResizable(false);
 		primaryStage.setScene(s);
 		primaryStage.show();
 	}

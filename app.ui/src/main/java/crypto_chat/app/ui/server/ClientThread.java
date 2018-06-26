@@ -11,11 +11,11 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 
 import crypto_chat.app.core.globals.Threads;
-import crypto_chat.app.ui.host.ChatLobbyHostController;
+import crypto_chat.app.ui.host.ChatHostController;
 
 public class ClientThread implements Runnable {
 	
-	private ChatLobbyHostController controller;
+	private ChatHostController controller;
 	private ObservableClient observableClient;
 	private String name;
 	private Socket clientSocket;
@@ -25,7 +25,7 @@ public class ClientThread implements Runnable {
 	private PrintStream toClient;
 	private BufferedReader fromClient;
 	
-	public ClientThread(ChatLobbyHostController controller, String name, Socket clientSocket) {
+	public ClientThread(ChatHostController controller, String name, Socket clientSocket) {
 		this.controller = controller;
 		this.name = name;
 		this.clientSocket = clientSocket;

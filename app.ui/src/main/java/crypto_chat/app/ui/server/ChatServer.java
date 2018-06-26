@@ -9,17 +9,17 @@ import java.util.Iterator;
 import java.util.List;
 
 import crypto_chat.app.core.globals.Threads;
-import crypto_chat.app.ui.host.ChatLobbyHostController;
+import crypto_chat.app.ui.host.ChatHostController;
 
 public class ChatServer implements Runnable{
 	
 	private final List<ClientThread> clients = new ArrayList<>();
 	
-	ChatLobbyHostController controller;
+	ChatHostController controller;
 	String serverName, serverPassword;
 	ServerSocket serverSocket;
 	
-	public ChatServer(ChatLobbyHostController controller, ServerSocket serverSocket, String serverName, String serverPassword) {
+	public ChatServer(ChatHostController controller, ServerSocket serverSocket, String serverName, String serverPassword) {
 		this.controller = controller;
 		this.serverSocket = serverSocket;
 		this.serverName = serverName;

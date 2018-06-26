@@ -38,7 +38,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-public class ChatLobbyHostController {
+public class ChatHostController {
 	
 	@FXML TextField serverIPField, serverPortField, serverShownPassword;
 	@FXML PasswordField serverHiddenPassword;
@@ -63,7 +63,7 @@ public class ChatLobbyHostController {
 	
 	private ObservableList<ObservableClient> clients = FXCollections.observableArrayList();
 	
-	public ChatLobbyHostController(Stage stage, ServerSocket serverSocket, String serverName, String serverPassword) {
+	public ChatHostController(Stage stage, ServerSocket serverSocket, String serverName, String serverPassword) {
 		this.myStage = stage;
 		this.serverSocket = serverSocket;
 		this.serverName = serverName;
@@ -167,6 +167,7 @@ public class ChatLobbyHostController {
 	}
 	
 	public void gotMessageFromClient(ClientThread clientThread) {
+		
 		
 	}
 	

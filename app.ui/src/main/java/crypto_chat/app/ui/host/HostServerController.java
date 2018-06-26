@@ -175,8 +175,8 @@ public class HostServerController {
 	}
 	
 	private void initializeLobbyUI(ServerSocket serversocket) {
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("ChatLobbyHost.fxml"));
-		ChatLobbyHostController controller = new ChatLobbyHostController(myStage, serversocket, serverNameField.getText(), serverPasswordField.getText());
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("ChatHost.fxml"));
+		ChatHostController controller = new ChatHostController(myStage, serversocket, serverNameField.getText(), serverPasswordField.getText());
 		loader.setController(controller);
 		Parent root;
 		try {
