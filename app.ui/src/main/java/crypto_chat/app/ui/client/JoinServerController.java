@@ -1,13 +1,15 @@
 package crypto_chat.app.ui.client;
 
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.net.Socket;
 
-import crypto_chat.app.core.globals.NetworkDefaults;
+import crypto_chat.app.core.globals.*;
 import crypto_chat.app.core.util.Alerter;
-import crypto_chat.app.core.util.TimedTask;
+import crypto_chat.app.ui.server.ClientSocketHandler;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -18,7 +20,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 
 public class JoinServerController {
 
@@ -47,30 +48,58 @@ public class JoinServerController {
 		addValidateListener(serverPasswordField);
 		addValidateListener(serverPortField);
 		
-		connectButton.setOnKeyPressed(ke -> {
-			if (ke.getCode() == KeyCode.ENTER) {
-				connectButton.fire();
+		ControllerFunctions.buttonActionEnter(connectButton);
+		ControllerFunctions.buttonActionEnter(cancelButton);
+				
+		connectButton.setOnAction(ae -> {	
+//			Task<Void> update_task = new Task<Void>() {
+//
+//				@Override
+//				protected Void call() throws Exception {
+//					disableGUI(true);
+//					updateMessage("Connecting to " + serverIPField.getText() + " : " + serverPortField.getText() + "...");	
+//					statusLabel.setStyle("-fx-text-fill:DarkOrange");
+//					return null;
+//				}
+//				
+//			};
+//			
+//			new Thread(update_task).start();;
+//				
+//			statusLabel.textProperty().bind(update_task.messageProperty());
+//			
+//			update_task.setOnSucceeded(e -> {
+//				statusLabel.textProperty().unbind();
+//				String ip_address = serverIPField.getText();
+//				String port = serverPortField.getText();
+//				String password = serverPasswordField.getText();
+//				Socket socket = establishConnection(ip_address, port, password);
+//				if(socket != null) {
+//					initializeChatUI(socket);
+//				}
+//				else {
+//					statusLabel.setText("Could connect with " + ip_address + " : " + port);
+//					statusLabel.setStyle("-fx-text-fill:Red");
+//					disableGUI(false);
+//				}
+//				
+//			});
+			
+			
+			String ip_address = serverIPField.getText();
+			String port = serverPortField.getText();
+			String password = serverPasswordField.getText();
+			Socket socket = establishConnection(ip_address, port, password);
+			if(socket != null) {
+				initializeChatUI(socket);
 			}
-		});
-		
-		connectButton.setOnAction(ae -> {		
-			
-			disableGUI(true);
-			updateStatusLabel("Connecting to " + serverIPField.getText() + ":" + serverPortField.getText() + "...", "DarkOrange");	
-			
-			if(!establishConnection(serverIPField.getText(), serverPortField.getText(), serverPasswordField.getText())) {
-				TimedTask.runLater(Duration.millis(500), () -> {
-					disableGUI(false);
-					updateStatusLabel("Ready to connect to server...", "DarkGreen");
-				});
-			}			
-			
-		});
-		
-		cancelButton.setOnKeyPressed(ke -> {
-			if (ke.getCode() == KeyCode.ENTER) {
-				cancelButton.fire();
+			else {
+				statusLabel.setText("Could connect with " + ip_address + " : " + port);
+				statusLabel.setStyle("-fx-text-fill:Red");
+				disableGUI(false);
 			}
+			
+			
 		});
 		
 		cancelButton.setOnAction(ae -> {
@@ -91,21 +120,6 @@ public class JoinServerController {
 			}
 		});
 		
-		serverIPField.textProperty().addListener(new ChangeListener<String>() {
-		    @Override
-		    public void changed(ObservableValue<? extends String> observable, String oldValue, 
-		        String newValue) {
-		    	String fieldText = serverIPField.getText();
-		        if (!newValue.matches("[.0-9]")) {
-		            fieldText = newValue.replaceAll("[^.0-9]", "");
-		        }
-		        if(newValue.length() > 15) {
-		        	fieldText = newValue.substring(0, 15);
-		        }
-		        serverIPField.setText(fieldText);
-		    }
-		});
-		
 		serverPortField.textProperty().addListener(new ChangeListener<String>() {
 		    @Override
 		    public void changed(ObservableValue<? extends String> observable, String oldValue, 
@@ -123,47 +137,54 @@ public class JoinServerController {
 		
 		serverIPField.setOnKeyPressed(ke -> {
 			if (ke.getCode() == KeyCode.ENTER) {
+				ke.consume();
 				connectButton.fire();
 			}
 		});
 		
 		serverPasswordField.setOnKeyPressed(ke -> {
 			if (ke.getCode() == KeyCode.ENTER) {
+				ke.consume();
 				connectButton.fire();
 			}
 		});
 		
 		serverPortField.setOnKeyPressed(ke -> {
 			if (ke.getCode() == KeyCode.ENTER) {
+				ke.consume();
 				connectButton.fire();
 			}
 		});
 	}
 	
-	private boolean establishConnection(String ip_address, String port, String password) {
+	private Socket establishConnection(String ip_address, String port, String password) {
 		
 		int int_port = 0; 
 		try {
 			int_port = Integer.valueOf(port); 
 		} catch (NumberFormatException e) {
 			Alerter.error("Failed to connect", "Port must be an integer in the range 0-65535");
-			return false;
+			return null;
 		}
 		if(int_port < 0 || int_port > 65535) {
 			Alerter.error("Failed to connect", "Port must be an integer in the range 0-65535");
-			return false;
+			return null;
 		}
 		
-		Socket serverSocket;
+		Socket serversocket;
 		try {
-			serverSocket = new Socket(ip_address, int_port);
+			serversocket = new Socket(ip_address, int_port);
 		} catch (Exception e) {
-			Alerter.exception("Failed to connect", "Could not connect with " + ip_address + ":" + int_port, e);
-			return false;
+			Alerter.exception("Failed to connect", "Could not connect with " + ip_address + " : " + int_port, e);
+			return null;
 		}
 		
-		ClientSocketHandler socketHandler = new ClientSocketHandler(serverSocket);
+		return serversocket;
+	}
+	
+	private void initializeChatUI(Socket serversocket) {
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("ChatClient.fxml"));
+		ClientSocketHandler socketHandler = new ClientSocketHandler(serversocket);
 		ChatClientController controller = new ChatClientController(socketHandler);
 		loader.setController(controller);
 		
@@ -172,18 +193,10 @@ public class JoinServerController {
 			root = loader.load();
 		} catch (IOException e) {
 			e.printStackTrace();
-			try {
-				serverSocket.close();
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
-			Alerter.exception("Failed to connect", "Error occured while loading the ChatLobby UI", e);	
-			return false;
+			return;
 		}
 		Scene scene = new Scene(root);
 		myStage.setScene(scene);
-		
-		return true;
 	}
 		
 	private void validateFields() {
@@ -204,15 +217,10 @@ public class JoinServerController {
 	private void disableGUI(boolean disable) {
 		serverIPField.setDisable(disable);
 		serverPasswordField.setDisable(disable);
-		serverPortField.setDisable(disable);
+		serverPortField.setDisable(portCheckbox.isSelected() ? true : disable);
 		portCheckbox.setDisable(disable);
 		connectButton.setDisable(disable);
 		cancelButton.setDisable(disable);
-	}
-	
-	private void updateStatusLabel(String text, String color) {
-		statusLabel.setText(text);
-		statusLabel.setStyle("-fx-text-fill:"+color);
 	}
 	
 	public void setMainMenuScene(Scene scene) {

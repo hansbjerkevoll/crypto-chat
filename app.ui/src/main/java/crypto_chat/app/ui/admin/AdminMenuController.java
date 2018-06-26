@@ -1,9 +1,9 @@
 package crypto_chat.app.ui.admin;
 
+import crypto_chat.app.core.globals.ControllerFunctions;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
 
 public class AdminMenuController {
@@ -12,7 +12,9 @@ public class AdminMenuController {
 	
 	Scene mainMenuScene;
 	
-	@FXML Button backButton;
+	@FXML Button settingsButton;
+	@FXML Button portforwardButton;
+	@FXML Button backButton;;
 	
 	public AdminMenuController(Stage stage) {
 		this.myStage = stage; 
@@ -20,11 +22,9 @@ public class AdminMenuController {
 	
 	@FXML public void initialize() {
 		
-		backButton.setOnKeyPressed(ke -> {
-			if (ke.getCode() == KeyCode.ENTER) {
-				backButton.fire();
-			}
-		});
+		ControllerFunctions.buttonActionEnter(settingsButton);
+		ControllerFunctions.buttonActionEnter(portforwardButton);
+		ControllerFunctions.buttonActionEnter(backButton);
 		
 		backButton.setOnAction(ae -> {
 			if (mainMenuScene != null) {

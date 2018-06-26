@@ -1,6 +1,8 @@
-package crypto_chat.app.ui.client;
+package crypto_chat.app.ui.server;
 
 import java.net.Socket;
+
+import crypto_chat.app.ui.client.ChatClientController;
 
 public class ClientSocketHandler implements Runnable{
 	

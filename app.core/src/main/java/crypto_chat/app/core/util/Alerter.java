@@ -2,9 +2,12 @@ package crypto_chat.app.core.util;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Optional;
+
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
@@ -62,7 +65,7 @@ public class Alerter {
         };
         run(r);
     }
-
+   
     /**
      * Show a simple information dialog
      *

@@ -1,23 +1,25 @@
-package crypto_chat.app.ui.host;
+package crypto_chat.app.ui.server;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import crypto_chat.app.core.globals.Threads;
+import crypto_chat.app.ui.host.ChatLobbyHostController;
 
 public class ChatServer implements Runnable{
 	
 	private final List<ClientThread> clients = new ArrayList<>();
 	
-	ChatHostController controller;
+	ChatLobbyHostController controller;
 	String serverName, serverPassword;
 	ServerSocket serverSocket;
 	
-	public ChatServer(ChatHostController controller, ServerSocket serverSocket, String serverName, String serverPassword) {
+	public ChatServer(ChatLobbyHostController controller, ServerSocket serverSocket, String serverName, String serverPassword) {
 		this.controller = controller;
 		this.serverSocket = serverSocket;
 		this.serverName = serverName;
@@ -29,13 +31,13 @@ public class ChatServer implements Runnable{
 		while (!Thread.currentThread().isInterrupted()) {
 			try {
 				Socket clientSocket = serverSocket.accept(); 
-				System.out.printf("New client connected: %s:%s (%s)\n",
+				System.out.printf("New client connected: %s:%s\n",
 						clientSocket.getInetAddress().getHostAddress(),
 						clientSocket.getPort());
 				ClientThread clientThread = new ClientThread(controller, "N/A", clientSocket);
-				ObservableClient clientObs = new ObservableClient(clientThread);
-				clientThread.setObservableClient(clientObs);
-				controller.offerClient(clientObs);
+				ObservableClient client = new ObservableClient(clientThread);
+				clientThread.setObservableClient(client);
+				controller.connectClient(client);
 				Thread t = new Thread(clientThread);
 				t.start();
 				Threads.THREADS.add(t);
@@ -62,6 +64,18 @@ public class ChatServer implements Runnable{
 	private void addClient(ClientThread c) {
 		synchronized (this) {
 			this.clients.add(c);
+		}
+	}
+	
+	public boolean removeClient(ClientThread c) {
+		synchronized (this) {
+			return this.clients.remove(c);
+		}
+	}
+
+	public Iterator<ClientThread> getClients() {
+		synchronized (this) {
+			return clients.iterator();
 		}
 	}
 

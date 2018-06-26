@@ -1,6 +1,6 @@
 package crypto_chat.app.ui;
 
-import crypto_chat.app.core.globals.ResourceLocations;
+import crypto_chat.app.core.globals.ControllerFunctions;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -15,7 +15,7 @@ public class App extends Application{
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		FXMLLoader loader = new FXMLLoader(getClass().getResource(ResourceLocations.FXML_MAIN_MENU));
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("MainMenu.fxml"));
 		MainMenuController controller = new MainMenuController(primaryStage);
 		loader.setController(controller);
 		Parent root = loader.load();
@@ -23,6 +23,13 @@ public class App extends Application{
 		primaryStage.setTitle("Crypto Chat");
 		primaryStage.setScene(s);
 		primaryStage.show();
+	}
+	
+	@Override
+	public void stop() throws Exception {
+		System.out.println("Interrupting all threads");
+		ControllerFunctions.stopServer();
+		System.out.println("Exiting...");
 	}
 
 }

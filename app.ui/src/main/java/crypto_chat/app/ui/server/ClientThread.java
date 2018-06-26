@@ -1,4 +1,4 @@
-package crypto_chat.app.ui.host;
+package crypto_chat.app.ui.server;
 
 import java.io.BufferedReader;
 import java.io.Closeable;
@@ -11,10 +11,11 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 
 import crypto_chat.app.core.globals.Threads;
+import crypto_chat.app.ui.host.ChatLobbyHostController;
 
 public class ClientThread implements Runnable {
 	
-	private ChatHostController controller;
+	private ChatLobbyHostController controller;
 	private ObservableClient observableClient;
 	private String name;
 	private Socket clientSocket;
@@ -24,7 +25,7 @@ public class ClientThread implements Runnable {
 	private PrintStream toClient;
 	private BufferedReader fromClient;
 	
-	public ClientThread(ChatHostController controller, String name, Socket clientSocket) {
+	public ClientThread(ChatLobbyHostController controller, String name, Socket clientSocket) {
 		this.controller = controller;
 		this.name = name;
 		this.clientSocket = clientSocket;
@@ -92,6 +93,27 @@ public class ClientThread implements Runnable {
 		closeHelper(toClient);
 		closeHelper(fromClient);
 		closeHelper(clientSocket);
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	public String getIP() {
+		return clientSocket.getInetAddress().getHostAddress();
+	}
+
+	public void sendMessage(String msg) {
+		synchronized (this) {
+			messageToClient.offer(msg);
+			this.notifyAll();
+		}
+	}
+
+	public String getMessage() {
+		synchronized (this) {
+			return messageFromClient.poll();
+		}
 	}
 
 }

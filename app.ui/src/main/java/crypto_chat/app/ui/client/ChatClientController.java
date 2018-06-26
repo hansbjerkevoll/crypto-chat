@@ -1,5 +1,7 @@
 package crypto_chat.app.ui.client;
 
+import crypto_chat.app.ui.server.ClientSocketHandler;
+
 public class ChatClientController {
 
 	ClientSocketHandler socketHandler;
