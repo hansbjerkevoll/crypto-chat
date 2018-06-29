@@ -11,6 +11,7 @@ import crypto_chat.app.core.globals.ControllerFunctions;
 import crypto_chat.app.core.globals.Threads;
 import crypto_chat.app.core.util.Alerter;
 import crypto_chat.app.core.util.RunOnJavaFX;
+import crypto_chat.app.core.util.TimedTask;
 import crypto_chat.app.ui.MainMenuController;
 import crypto_chat.app.ui.server.ChatServer;
 import crypto_chat.app.ui.server.ClientThread;
@@ -31,26 +32,30 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class ChatHostController {
 	
 	@FXML TextField serverIPField, serverPortField, serverShownPassword;
 	@FXML PasswordField serverHiddenPassword;
 	@FXML Button changeRoomButton, closeServerButton;
-	@FXML Label serverNameLabel;
+	@FXML Label serverNameLabel, serverRoomLabel;
 	@FXML TableView<ObservableClient> tableviewClients;
 	@FXML TableColumn<ObservableClient, String> tablecolumnName;
 	@FXML TableColumn<ObservableClient, String> tablecolumnIP;
 	@FXML ListView<String> listviewUpdates;
-	@FXML HBox lobbyHBox, chatHBox;
-	@FXML VBox chatRoom;
+	@FXML HBox lobbyHBox;
+	@FXML VBox chatRoom, chatVBox;
 	@FXML ScrollPane chatRoomScroll;
+	@FXML TextArea chatMessageArea;
 	
 	private Stage myStage;
 	
@@ -78,11 +83,13 @@ public class ChatHostController {
 		serverShownPassword.setText(serverPassword);
 		serverNameLabel.setText(serverName);
 		
+		serverIPField.setFocusTraversable(false);
+		
 		serverShownPassword.setVisible(false);
 		serverShownPassword.setManaged(false);	
 		
-		chatHBox.setVisible(false);
-		chatHBox.setManaged(false);
+		chatVBox.setVisible(false);
+		chatVBox.setManaged(false);
 		
 		chatServer = new ChatServer(this, serverSocket, serverName, serverPassword);
 		chatServerThread = new Thread(chatServer, "ListenerServerThread");
@@ -108,11 +115,29 @@ public class ChatHostController {
 		});
 		
 		changeRoomButton.setOnAction(ae -> {
-			chatHBox.setVisible(!chatHBox.isVisible());
-			chatHBox.setManaged(!chatHBox.isManaged());
+			chatVBox.setVisible(!chatVBox.isVisible());
+			chatVBox.setManaged(!chatVBox.isManaged());
 			lobbyHBox.setVisible(!lobbyHBox.isVisible());
 			lobbyHBox.setManaged(!lobbyHBox.isManaged());
-			changeRoomButton.setText(chatHBox.isVisible() ? "Go to Chat Lobby" : "Go to Chat Room");
+			closeServerButton.setVisible(!closeServerButton.isVisible());
+			closeServerButton.setManaged(!closeServerButton.isManaged());
+			changeRoomButton.setText(chatVBox.isVisible() ? "Go to Chat Lobby" : "Go to Chat Room");
+			serverRoomLabel.setText(chatVBox.isVisible() ? "Chat Server Room" : "Chat Server Lobby");
+			if(chatVBox.isVisible())chatMessageArea.requestFocus();
+		});
+		
+		chatMessageArea.setOnKeyPressed(ke -> {
+			String message = chatMessageArea.getText().trim();
+			if(ke.getCode() == KeyCode.ENTER) {
+				ke.consume();
+				if(ke.isShiftDown()) {
+					chatMessageArea.setText(chatMessageArea.getText() + "\n");
+					chatMessageArea.positionCaret(chatMessageArea.getText().length());
+				} else if(!message.equals("")) {
+					newMessage("Host", message);
+					chatMessageArea.clear();
+				}	
+			}
 		});
 		
 		closeServerButton.setOnAction(ae -> {
@@ -163,7 +188,10 @@ public class ChatHostController {
 		nameLabel.setStyle("-fx-font-weight:Bold");
 		messageBox.getChildren().addAll(nameLabel, messageLabel);
 		chatRoom.getChildren().add(messageBox);
-		chatRoomScroll.setVvalue(1.0);
+		TimedTask.runLater(new Duration(30), () -> {
+			chatRoomScroll.setVvalue(1.0);
+		});
+		
 	}
 	
 	public void gotMessageFromClient(ClientThread clientThread) {

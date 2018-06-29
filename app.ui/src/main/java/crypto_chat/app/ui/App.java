@@ -23,7 +23,11 @@ public class App extends Application{
 		primaryStage.setTitle("Crypto Chat");
 		primaryStage.setResizable(false);
 		primaryStage.setScene(s);
+		primaryStage.setWidth(950);
+		primaryStage.setHeight(750);
 		primaryStage.show();
+		System.out.println(primaryStage.getWidth());
+		System.out.println(primaryStage.getHeight());
 	}
 	
 	@Override

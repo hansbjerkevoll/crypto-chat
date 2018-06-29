@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" prefHeight="750.0" prefWidth="950.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<VBox alignment="CENTER" prefHeight="750.0" prefWidth="950.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <Label text="Administration">
          <font>
@@ -23,13 +23,13 @@
             <VBox alignment="CENTER" maxWidth="200.0" prefWidth="200.0" spacing="10.0">
                <children>
                   <Button fx:id="settingsButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Settings" />
-                  <Button fx:id="portforwardButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Port forwarding" />
+                  <Button fx:id="portforwardButton" disable="true" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Port forwarding" />
                   <Separator prefWidth="200.0">
                      <VBox.margin>
                         <Insets bottom="5.0" top="5.0" />
                      </VBox.margin>
                   </Separator>
-                  <Button fx:id="backButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Go back">
+                  <Button fx:id="backButton" cancelButton="true" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Go back">
                      <VBox.margin>
                         <Insets />
                      </VBox.margin>

@@ -8,6 +8,7 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
@@ -52,7 +53,7 @@
             <Insets top="10.0" />
          </VBox.margin>
       </Label>
-      <Label alignment="CENTER" maxWidth="1.7976931348623157E308" text="Chat Server Lobby">
+      <Label fx:id="serverRoomLabel" alignment="CENTER" maxWidth="1.7976931348623157E308" text="Chat Server Lobby">
          <font>
             <Font size="16.0" />
          </font>
@@ -97,12 +98,12 @@
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </HBox.margin>
                   </HBox>
-                  <HBox fx:id="chatHBox" prefHeight="542.0" prefWidth="820.0">
+                  <VBox fx:id="chatVBox" alignment="CENTER" prefHeight="542.0" prefWidth="820.0" spacing="5.0">
+                     <HBox.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </HBox.margin>
                      <children>
-                        <ScrollPane fx:id="chatRoomScroll" prefHeight="547.0" prefWidth="810.0">
-                           <HBox.margin>
-                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                           </HBox.margin>
+                        <ScrollPane fx:id="chatRoomScroll" maxHeight="547.0" maxWidth="810.0" prefHeight="547.0" prefWidth="810.0">
                            <content>
                               <VBox fx:id="chatRoom" spacing="5.0">
                                  <padding>
@@ -111,11 +112,9 @@
                               </VBox>
                            </content>
                         </ScrollPane>
+                        <TextArea fx:id="chatMessageArea" maxWidth="810.0" prefHeight="150.0" promptText="Write a message..." wrapText="true" />
                      </children>
-                     <HBox.margin>
-                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                     </HBox.margin>
-                  </HBox>
+                  </VBox>
                </children>
             </HBox>
          </children>

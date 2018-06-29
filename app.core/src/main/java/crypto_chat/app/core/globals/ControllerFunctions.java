@@ -1,6 +1,7 @@
 package crypto_chat.app.core.globals;
 
 import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 
 public class ControllerFunctions {
@@ -11,6 +12,12 @@ public class ControllerFunctions {
 				ke.consume();
 				button.fire();
 			}
+		});
+	}
+	
+	public static void fieldFireButton(TextField field, Button button) {
+		field.setOnAction(ae -> {
+			button.fire();
 		});
 	}
 	

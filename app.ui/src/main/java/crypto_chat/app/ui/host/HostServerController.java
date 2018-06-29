@@ -5,6 +5,8 @@ import java.net.ServerSocket;
 
 import crypto_chat.app.core.globals.ControllerFunctions;
 import crypto_chat.app.core.globals.NetworkDefaults;
+import crypto_chat.app.core.settings.Settings;
+import crypto_chat.app.core.settings.SettingsFactory;
 import crypto_chat.app.core.util.Alerter;
 
 import javafx.beans.value.ChangeListener;
@@ -18,13 +20,13 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
 
 public class HostServerController {
 	
-	Stage myStage;
-	Scene mainMenuScene;
+	private Stage myStage;
+	private Scene mainMenuScene;
+	private Settings settings;
 	
 	@FXML Button cancelButton, hostButton;
 	@FXML Label statusLabel;
@@ -36,18 +38,18 @@ public class HostServerController {
 	}
 	
 	@FXML public void initialize() {
+		
+		settings = SettingsFactory.getSettings();
+		
+		if(settings != null) {
+			serverNameField.setText(settings.getServer_name());
+			serverPasswordField.setText(settings.getServer_password());
+		}
 				
 		serverPortField.setText(NetworkDefaults.PORT);
 		serverPortField.setDisable(true);
 		portCheckbox.setSelected(true);
 		hostButton.setDisable(true);
-		
-		addValidateListener(serverNameField);
-		addValidateListener(serverPasswordField);
-		addValidateListener(serverPortField);
-		
-		ControllerFunctions.buttonActionEnter(hostButton);
-		ControllerFunctions.buttonActionEnter(cancelButton);
 		
 		hostButton.setOnAction(ae -> {
 			
@@ -94,6 +96,12 @@ public class HostServerController {
 			
 		});
 		
+		cancelButton.setOnAction(ae -> {
+			if (mainMenuScene != null) {
+				((Stage) cancelButton.getScene().getWindow()).setScene(mainMenuScene);
+			}
+		});	
+		
 		portCheckbox.selectedProperty().addListener((obs, newv, oldv) -> {
 			if(!newv) {
 				serverPortField.setText(NetworkDefaults.PORT);
@@ -102,36 +110,9 @@ public class HostServerController {
 			else {
 				serverPortField.clear();;
 				serverPortField.setDisable(false);
+				serverPortField.requestFocus();
 			}
-		});
-		
-		cancelButton.setOnAction(ae -> {
-			if (mainMenuScene != null) {
-				((Stage) cancelButton.getScene().getWindow()).setScene(mainMenuScene);
-			}
-		});
-		
-		serverNameField.setOnKeyPressed(ke -> {
-			if (ke.getCode() == KeyCode.ENTER) {
-				ke.consume();
-				hostButton.fire();
-			}
-		});
-		
-		serverPasswordField.setOnKeyPressed(ke -> {
-			if (ke.getCode() == KeyCode.ENTER) {
-				ke.consume();
-				hostButton.fire();
-			}
-		});
-		
-		serverPortField.setOnKeyPressed(ke -> {
-			if (ke.getCode() == KeyCode.ENTER) {
-				ke.consume();
-				hostButton.fire();
-			}
-		});
-		
+		});	
 		
 		serverPortField.textProperty().addListener(new ChangeListener<String>() {
 		    @Override
@@ -147,6 +128,20 @@ public class HostServerController {
 		        serverPortField.setText(fieldText);
 		    }
 		});
+		
+		addValidateListener(serverNameField);
+		addValidateListener(serverPasswordField);
+		addValidateListener(serverPortField);
+		
+		ControllerFunctions.buttonActionEnter(hostButton);
+		ControllerFunctions.buttonActionEnter(cancelButton);
+
+		ControllerFunctions.fieldFireButton(serverNameField, hostButton);
+		ControllerFunctions.fieldFireButton(serverPasswordField, hostButton);
+		ControllerFunctions.fieldFireButton(serverPortField, hostButton);
+		
+		validateFields();
+		
 	}
 	
 	private ServerSocket setupServer(String port) {

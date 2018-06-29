@@ -8,6 +8,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import crypto_chat.app.core.globals.ControllerFunctions;
 import crypto_chat.app.ui.admin.AdminMenuController;
@@ -22,6 +23,7 @@ public class MainMenuController {
 	Scene adminScene = null;
 	
 	@FXML Button joinButton, hostButton, adminButton;
+	@FXML ImageView logoImage;
 	
 	public MainMenuController(Stage stage) {
 		this.myStage = stage;
@@ -32,6 +34,8 @@ public class MainMenuController {
 		ControllerFunctions.buttonActionEnter(joinButton);
 		ControllerFunctions.buttonActionEnter(hostButton);
 		ControllerFunctions.buttonActionEnter(adminButton);
+		
+		
 		
 		hostButton.setOnAction(ae -> {			
 			try {
