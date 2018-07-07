@@ -31,7 +31,7 @@ public class ChatClientController {
 	Scene mainMenuScene;
 	
 	ClientSocketHandler socketHandler;
-	String clientName, serverPassword;
+	String clientName, serverName, serverPassword;
 	
 	@FXML TextField serverIPField, serverPortField, serverHiddenPassword, serverShownPassword; 
 	@FXML Label serverNameLabel;
@@ -40,10 +40,11 @@ public class ChatClientController {
 	@FXML TextArea chatMessageArea;
 	@FXML VBox chatRoom;
 	
-	public ChatClientController(ClientSocketHandler socketHandler, String clientName, String serverPassword) {
+	public ChatClientController(ClientSocketHandler socketHandler, String clientName, String serverName, String serverPassword) {
 		this.socketHandler = socketHandler;
 		this.socketHandler.setController(this);
 		this.clientName = clientName;
+		this.serverName = serverName;
 		this.serverPassword = serverPassword;
 	}
 	
@@ -52,6 +53,7 @@ public class ChatClientController {
 		serverPortField.setText(Integer.toString(socketHandler.getPort()));
 		serverHiddenPassword.setText(serverPassword);
 		serverShownPassword.setText(serverPassword);
+		serverNameLabel.setText(serverName);
 		
 		serverShownPassword.setVisible(false);
 		serverShownPassword.setManaged(false);
@@ -78,7 +80,9 @@ public class ChatClientController {
 					chatMessageArea.setText(chatMessageArea.getText() + "\n");
 					chatMessageArea.positionCaret(chatMessageArea.getText().length());
 				} else if(!message.equals("")) {
-					sendChatMessageToServer(message, System.currentTimeMillis());
+					long timestamp = System.currentTimeMillis();
+					sendChatMessageToServer(message, timestamp);
+					newMessage(clientName, message, timestamp);
 					chatMessageArea.clear();
 				}	
 			}

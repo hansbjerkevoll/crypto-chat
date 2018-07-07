@@ -91,14 +91,14 @@ public class JoinServerController {
 				String port = serverPortField.getText();
 				String password = serverPasswordField.getText();
 				Socket socket = establishConnection(ip_address, port, password);
+				boolean connected = false;
 				if(socket != null) {
 					if(serverConnectionRequest(socket)) {
 						initializeChatUI(socket);
-					} else {
-						Alerter.error("Failed to connect", "Connection to server failed");
-					}
-					
-				} else {
+						connected = true;
+					} 				
+				} 
+				if(!connected) {
 					statusLabel.setText("Could connect with " + ip_address + " : " + port);
 					statusLabel.setStyle("-fx-text-fill:Red");
 					disableGUI(false);
@@ -199,10 +199,13 @@ public class JoinServerController {
 				if(cm.isAccepted()) {
 					this.givenServername = cm.getServername();
 					return true;
+				} else {
+					Alerter.error("Failed to connect", cm.getResponseMsg());
+					return false;
 				}
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			Alerter.exception("Failed to connect", "Something unexpected went wrong...", e);
 			return false;
 		} 
 		
@@ -213,7 +216,7 @@ public class JoinServerController {
 	private void initializeChatUI(Socket serversocket) {
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("ChatClient.fxml"));
 		ClientSocketHandler socketHandler = new ClientSocketHandler(serversocket);
-		ChatClientController controller = new ChatClientController(socketHandler, clientNameField.getText(), serverPasswordField.getText());
+		ChatClientController controller = new ChatClientController(socketHandler, clientNameField.getText(), givenServername, serverPasswordField.getText());
 		controller.setMainMenuScene(mainMenuScene);
 		loader.setController(controller);
 		

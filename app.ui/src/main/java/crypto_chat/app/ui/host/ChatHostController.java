@@ -74,6 +74,7 @@ public class ChatHostController {
 	private Thread chatServerThread;
 	
 	private ObservableList<ObservableClient> clients = FXCollections.observableArrayList();
+	private ArrayList<String> clientNames = new ArrayList<>();
 	private ArrayList<ChatMessage> chatHistory = new ArrayList<>();
 	
 	public ChatHostController(Stage stage, ServerSocket serverSocket, String hostName, String serverName, String serverPassword) {
@@ -102,6 +103,8 @@ public class ChatHostController {
 		chatServerThread = new Thread(chatServer, "ListenerServerThread");
 		chatServerThread.start();
 		Threads.THREADS.add(chatServerThread);		
+		
+		clientNames.add(hostName);
 	
 		tableviewClients.setItems(clients);
 		tablecolumnName.setCellValueFactory(new PropertyValueFactory<>("name"));
@@ -159,6 +162,14 @@ public class ChatHostController {
 		sendJSONToAllClients(json);
 	}
 	
+	public void forwardChatMessage(String msg, String sender_name) {
+		for(ObservableClient client : clients) {
+			if(!sender_name.equals(client.getName())) {
+				client.sendJSONMessage(msg);
+			}
+		}
+	}
+	
 	public void sendJSONToAllClients(String json) {
 		for(ObservableClient client : clients) {
 			client.sendJSONMessage(json);
@@ -178,7 +189,7 @@ public class ChatHostController {
 					ChatTextMessage cm = gson.fromJson(jsonElement, ChatTextMessage.class);
 					chatHistory.add(cm);
 					newMessage(cm.getSenderName(), cm.getMessage(), cm.getTimeStamp());
-					sendJSONToAllClients(msg);
+					forwardChatMessage(msg, cm.getSenderName());
 					break;
 				case CLOSED:
 					break;
@@ -187,24 +198,35 @@ public class ChatHostController {
 				case CONNECTION_REQUEST:
 					ClientConnectionRequest request = gson.fromJson(jsonElement, ClientConnectionRequest.class);
 					boolean accepted = false;
-					clientThread.setName(request.getClientName());
-					if(request.getHashedPassword().equals(serverPassword)) {
+					boolean available_name = checkNameAvailability(request.getClientName());
+					boolean correct_pwd = request.getHashedPassword().equals(serverPassword);
+					String response_msg = "Access denied";
+					
+					if(!available_name) {
+						response_msg = "Client name, " + request.getClientName() + ", already taken. Please choose another";
+					} else if (!correct_pwd) {
+						response_msg = "Incorrect password";
+					} 
+			
+					
+					if(available_name && correct_pwd) {
 						accepted = true;
+						response_msg = "Access granted";
+						clientThread.setName(request.getClientName());
 						ObservableClient client = new ObservableClient(clientThread);
 						clientThread.setObservableClient(client);
 						clients.add(client);
 						String newConnection = request.getClientName() + " (" + clientThread.getIP() + ") connected.";
 						newUpdate(newConnection);
-					}
-					else {
+					} else {
 						try {
 							clientThread.disconnectClient();
 						} catch (IOException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 					}
-					ClientConnectionResponse response = new ClientConnectionResponse(accepted, serverName);
+					
+					ClientConnectionResponse response = new ClientConnectionResponse(accepted, serverName, response_msg);
 					String json = new Gson().toJson(response);
 					clientThread.sendMessageToClient(json);
 					break;
@@ -218,6 +240,15 @@ public class ChatHostController {
 	
 	public void removeClient(ObservableClient observableClient) {
 		
+	}
+	
+	private boolean checkNameAvailability(String name) {
+		for(String clientName : clientNames) {
+			if(clientName.equals(name)) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	private String getExternalIP() {

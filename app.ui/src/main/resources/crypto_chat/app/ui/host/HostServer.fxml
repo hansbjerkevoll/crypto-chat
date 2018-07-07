@@ -57,14 +57,36 @@
                   </VBox>
                   <VBox spacing="5.0">
                      <children>
-                        <Button fx:id="hostButton" defaultButton="true" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Host server" />
+                        <Label text="Load chat history from file:" />
+                        <HBox spacing="5.0">
+                           <children>
+                              <Button fx:id="loadChatButton" mnemonicParsing="false" text="Browse...">
+                                 <font>
+                                    <Font size="10.0" />
+                                 </font>
+                              </Button>
+                              <Label fx:id="chatFileLabel" text="No file selected...">
+                                 <padding>
+                                    <Insets top="2.0" />
+                                 </padding>
+                              </Label>
+                           </children>
+                        </HBox>
                      </children>
                   </VBox>
-                  <Separator prefWidth="200.0" />
-                  <VBox>
+                  <VBox spacing="5.0">
                      <children>
+                        <Button fx:id="hostButton" defaultButton="true" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Host server">
+                           <VBox.margin>
+                              <Insets bottom="3.0" />
+                           </VBox.margin>
+                        </Button>
+                        <Separator prefWidth="200.0" />
                         <Button fx:id="cancelButton" cancelButton="true" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Cancel" />
                      </children>
+                     <padding>
+                        <Insets top="10.0" />
+                     </padding>
                   </VBox>
                </children>
             </VBox>
