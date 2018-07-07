@@ -1,12 +1,24 @@
 package crypto_chat.app.ui.client;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.net.Socket;
+import java.nio.charset.Charset;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 import crypto_chat.app.core.globals.*;
+import crypto_chat.app.core.json_models.MessageType;
+import crypto_chat.app.core.json_models.json_msg.ClientConnectionRequest;
+import crypto_chat.app.core.json_models.json_msg.ClientConnectionResponse;
 import crypto_chat.app.core.settings.Settings;
 import crypto_chat.app.core.settings.SettingsFactory;
 import crypto_chat.app.core.util.Alerter;
+import crypto_chat.app.core.util.GetPackageHeader;
 import crypto_chat.app.ui.server.ClientSocketHandler;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -34,6 +46,8 @@ public class JoinServerController {
 	@FXML TextField clientNameField, serverIPField, serverPasswordField, serverPortField;
 	
 	String port_field = null;
+	
+	String givenServername = null;
 	
 	public JoinServerController(Stage stage) {
 		myStage = stage;
@@ -78,9 +92,13 @@ public class JoinServerController {
 				String password = serverPasswordField.getText();
 				Socket socket = establishConnection(ip_address, port, password);
 				if(socket != null) {
-					initializeChatUI(socket);
-				}
-				else {
+					if(serverConnectionRequest(socket)) {
+						initializeChatUI(socket);
+					} else {
+						Alerter.error("Failed to connect", "Connection to server failed");
+					}
+					
+				} else {
 					statusLabel.setText("Could connect with " + ip_address + " : " + port);
 					statusLabel.setStyle("-fx-text-fill:Red");
 					disableGUI(false);
@@ -161,6 +179,36 @@ public class JoinServerController {
 		
 		return serversocket;
 	}
+	
+	private boolean serverConnectionRequest(Socket serverSocket) {
+		
+		try {
+			PrintStream toServer = new PrintStream(serverSocket.getOutputStream(), true, "UTF-8");
+			BufferedReader fromServer = new BufferedReader(new InputStreamReader(serverSocket.getInputStream(), Charset.forName("UTF-8")));
+			ClientConnectionRequest cr = new ClientConnectionRequest(clientNameField.getText(), serverPasswordField.getText());
+			String json = new Gson().toJson(cr);
+			toServer.println(json);
+			
+			String server_response = fromServer.readLine();
+			System.out.println(server_response);
+			JsonElement jsonElement = new JsonParser().parse(server_response);
+			MessageType type = GetPackageHeader.getPackageHeader(jsonElement);
+			Gson gson = new Gson();
+			if(type.equals(MessageType.CONNECTION_RESPONSE)) {
+				ClientConnectionResponse cm = gson.fromJson(jsonElement, ClientConnectionResponse.class);
+				if(cm.isAccepted()) {
+					this.givenServername = cm.getServername();
+					return true;
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		} 
+		
+		return false;
+	}
+	
 	
 	private void initializeChatUI(Socket serversocket) {
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("ChatClient.fxml"));

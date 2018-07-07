@@ -15,8 +15,11 @@ import com.google.gson.JsonParser;
 
 import crypto_chat.app.core.globals.ControllerFunctions;
 import crypto_chat.app.core.globals.Threads;
-import crypto_chat.app.core.json_models.ChatTextMessage;
 import crypto_chat.app.core.json_models.MessageType;
+import crypto_chat.app.core.json_models.json_msg.ChatMessage;
+import crypto_chat.app.core.json_models.json_msg.ChatTextMessage;
+import crypto_chat.app.core.json_models.json_msg.ClientConnectionRequest;
+import crypto_chat.app.core.json_models.json_msg.ClientConnectionResponse;
 import crypto_chat.app.core.util.Alerter;
 import crypto_chat.app.core.util.RunOnJavaFX;
 import crypto_chat.app.core.util.TimedTask;
@@ -71,7 +74,7 @@ public class ChatHostController {
 	private Thread chatServerThread;
 	
 	private ObservableList<ObservableClient> clients = FXCollections.observableArrayList();
-	private ArrayList<ChatTextMessage> chatHistory = new ArrayList<>();
+	private ArrayList<ChatMessage> chatHistory = new ArrayList<>();
 	
 	public ChatHostController(Stage stage, ServerSocket serverSocket, String hostName, String serverName, String serverPassword) {
 		this.myStage = stage;
@@ -166,7 +169,6 @@ public class ChatHostController {
 		RunOnJavaFX.run(() -> {
 			String msg;
 			while ((msg = clientThread.getMessage()) != null) {
-				System.out.println("Got message from server:\n" + msg);
 				// Decode JSON
 				JsonElement jsonElement = new JsonParser().parse(msg);
 				MessageType type = GetPackageHeader.getPackageHeader(jsonElement);
@@ -181,6 +183,30 @@ public class ChatHostController {
 				case CLOSED:
 					break;
 				case WELCOME:
+					break;
+				case CONNECTION_REQUEST:
+					ClientConnectionRequest request = gson.fromJson(jsonElement, ClientConnectionRequest.class);
+					boolean accepted = false;
+					clientThread.setName(request.getClientName());
+					if(request.getHashedPassword().equals(serverPassword)) {
+						accepted = true;
+						ObservableClient client = new ObservableClient(clientThread);
+						clientThread.setObservableClient(client);
+						clients.add(client);
+						String newConnection = request.getClientName() + " (" + clientThread.getIP() + ") connected.";
+						newUpdate(newConnection);
+					}
+					else {
+						try {
+							clientThread.disconnectClient();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					ClientConnectionResponse response = new ClientConnectionResponse(accepted, serverName);
+					String json = new Gson().toJson(response);
+					clientThread.sendMessageToClient(json);
 					break;
 				default:
 					break;
@@ -208,14 +234,6 @@ public class ChatHostController {
 			e.printStackTrace();
 		}
 		return ip_text;
-	}
-	
-	public void connectClient(ObservableClient client) {
-		RunOnJavaFX.run(() -> {
-			String newConnection = client.getName() + " (" + client.getIP() + ") connected.";
-			newUpdate(newConnection);
-			clients.add(client);
-		});
 	}
 	
 	private void newUpdate(String updateText) {

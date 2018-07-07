@@ -7,8 +7,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
 import crypto_chat.app.core.globals.Threads;
-import crypto_chat.app.core.json_models.ChatTextMessage;
 import crypto_chat.app.core.json_models.MessageType;
+import crypto_chat.app.core.json_models.json_msg.ChatTextMessage;
+import crypto_chat.app.core.json_models.json_msg.WelcomeMessage;
 import crypto_chat.app.core.util.GetPackageHeader;
 import crypto_chat.app.core.util.RunOnJavaFX;
 import crypto_chat.app.core.util.TimedTask;
@@ -33,6 +34,7 @@ public class ChatClientController {
 	String clientName, serverPassword;
 	
 	@FXML TextField serverIPField, serverPortField, serverHiddenPassword, serverShownPassword; 
+	@FXML Label serverNameLabel;
 	@FXML Button leaveServerButton;
 	@FXML ScrollPane chatRoomScroll;
 	@FXML TextArea chatMessageArea;
@@ -104,6 +106,8 @@ public class ChatClientController {
 				case CLOSED:
 					break;
 				case WELCOME:
+					WelcomeMessage wm = gson.fromJson(jsonElement, WelcomeMessage.class);
+					serverNameLabel.setText(wm.getServerName());
 					break;
 				default:
 					break;

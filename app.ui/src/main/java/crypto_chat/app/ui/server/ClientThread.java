@@ -17,17 +17,17 @@ public class ClientThread implements Runnable {
 	
 	private ChatHostController controller;
 	private ObservableClient observableClient;
-	private String name;
 	private Socket clientSocket;
+	private String name = "N/A";
 	private Queue<String> messageToClient = new ArrayDeque<>();
 	private Queue<String> messageFromClient = new ArrayDeque<>();
+	private Boolean disconnected = false;
 	
 	private PrintStream toClient;
 	private BufferedReader fromClient;
 	
-	public ClientThread(ChatHostController controller, String name, Socket clientSocket) {
+	public ClientThread(ChatHostController controller, Socket clientSocket) {
 		this.controller = controller;
-		this.name = name;
 		this.clientSocket = clientSocket;
 	}
 	
@@ -64,6 +64,12 @@ public class ClientThread implements Runnable {
 					if (messageFromClient.size() > 0) {
 						controller.gotMessageFromClient(this);
 					}
+					// Disconnect if disconnected
+					if(disconnected) {
+						toClient.close();
+						fromClient.close();
+						Thread.currentThread().interrupt();
+					}
 				}
 			}
 		} catch (InterruptedException e) {
@@ -95,10 +101,11 @@ public class ClientThread implements Runnable {
 		closeHelper(clientSocket);
 	}
 	
+	public void setName(String name) {
+		this.name = name;
+	}
+	
 	public String getName() {
-		if(name == null) {
-			return "N/A";
-		}
 		return name;
 	}
 	
@@ -117,6 +124,10 @@ public class ClientThread implements Runnable {
 		synchronized (this) {
 			return messageFromClient.poll();
 		}
+	}
+	
+	public void disconnectClient() throws IOException {
+		disconnected = true;
 	}
 
 }

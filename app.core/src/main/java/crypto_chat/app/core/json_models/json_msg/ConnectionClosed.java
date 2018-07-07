@@ -1,4 +1,7 @@
-package crypto_chat.app.core.json_models;
+package crypto_chat.app.core.json_models.json_msg;
+
+import crypto_chat.app.core.json_models.JsonPackage;
+import crypto_chat.app.core.json_models.MessageType;
 
 /**
  * Indicate to the other connection that we are closing the connection in an orderly fashion.

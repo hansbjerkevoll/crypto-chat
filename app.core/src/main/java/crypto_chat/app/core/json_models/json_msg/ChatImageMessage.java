@@ -1,5 +1,6 @@
-package crypto_chat.app.core.json_models;
+package crypto_chat.app.core.json_models.json_msg;
 
+import crypto_chat.app.core.json_models.MessageType;
 import javafx.scene.image.Image;
 
 public class ChatImageMessage extends ChatMessage {

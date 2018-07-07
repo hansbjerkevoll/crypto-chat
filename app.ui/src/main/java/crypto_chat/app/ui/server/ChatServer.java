@@ -31,10 +31,7 @@ public class ChatServer implements Runnable{
 		while (!Thread.currentThread().isInterrupted()) {
 			try {
 				Socket clientSocket = serverSocket.accept(); 
-				ClientThread clientThread = new ClientThread(controller, null, clientSocket);
-				ObservableClient client = new ObservableClient(clientThread);
-				clientThread.setObservableClient(client);
-				controller.connectClient(client);
+				ClientThread clientThread = new ClientThread(controller, clientSocket);
 				Thread t = new Thread(clientThread);
 				t.start();
 				Threads.THREADS.add(t);
