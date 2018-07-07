@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" prefHeight="750.0" prefWidth="950.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<VBox alignment="CENTER" prefHeight="750.0" prefWidth="950.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <Label text="Connect to server...">
          <font>
@@ -30,6 +30,12 @@
          <children>
             <VBox alignment="CENTER_LEFT" maxWidth="200.0" prefWidth="200.0" spacing="10.0">
                <children>
+                  <VBox spacing="5.0">
+                     <children>
+                        <Label text="Client name:" />
+                        <TextField fx:id="clientNameField" />
+                     </children>
+                  </VBox>
                   <VBox spacing="5.0">
                      <children>
                         <Label text="Server IP-address:" />
@@ -63,6 +69,9 @@
                </children>
             </VBox>
          </children>
+         <VBox.margin>
+            <Insets top="-114.0" />
+         </VBox.margin>
       </HBox>
    </children>
 </VBox>

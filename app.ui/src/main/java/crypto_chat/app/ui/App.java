@@ -5,6 +5,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 public class App extends Application{
@@ -21,13 +22,12 @@ public class App extends Application{
 		Parent root = loader.load();
 		Scene s = new Scene(root);
 		primaryStage.setTitle("Crypto Chat");
+		primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("logo.png")));
 		primaryStage.setResizable(false);
 		primaryStage.setScene(s);
 		primaryStage.setWidth(950);
 		primaryStage.setHeight(750);
 		primaryStage.show();
-		System.out.println(primaryStage.getWidth());
-		System.out.println(primaryStage.getHeight());
 	}
 	
 	@Override

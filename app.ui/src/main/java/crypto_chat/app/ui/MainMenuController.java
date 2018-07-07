@@ -18,37 +18,26 @@ import crypto_chat.app.ui.host.HostServerController;
 public class MainMenuController {
 	
 	Stage myStage;
-	Scene clientScene = null;
-	Scene serverScene = null;
 	Scene adminScene = null;
 	
 	@FXML Button joinButton, hostButton, adminButton;
-	@FXML ImageView logoImage;
 	
 	public MainMenuController(Stage stage) {
 		this.myStage = stage;
 	}
 	
-	@FXML public void initialize(){
-		
-		ControllerFunctions.buttonActionEnter(joinButton);
-		ControllerFunctions.buttonActionEnter(hostButton);
-		ControllerFunctions.buttonActionEnter(adminButton);
-		
-		
+	public void initialize(){
 		
 		hostButton.setOnAction(ae -> {			
 			try {
-				if (serverScene == null) {
-					URL location = getClass().getResource("host/HostServer.fxml");
-					FXMLLoader loader = new FXMLLoader(location);
-					HostServerController controller = new HostServerController(myStage);
-					controller.setMainMenuScene(hostButton.getScene());
-					loader.setController(controller);
-					Parent root = loader.load();
-					this.serverScene = new Scene(root);
-				}
-				myStage.setScene(serverScene);
+				URL location = getClass().getResource("host/HostServer.fxml");
+				FXMLLoader loader = new FXMLLoader(location);
+				HostServerController controller = new HostServerController(myStage);
+				controller.setMainMenuScene(hostButton.getScene());
+				loader.setController(controller);
+				Parent root = loader.load();
+				Scene hostscene = new Scene(root);
+				myStage.setScene(hostscene);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}					
@@ -56,16 +45,14 @@ public class MainMenuController {
 		
 		joinButton.setOnAction(ae -> {
 			try {
-				if (clientScene == null) {
-					URL location = getClass().getResource("client/JoinServer.fxml");
-					FXMLLoader loader = new FXMLLoader(location);
-					JoinServerController controller = new JoinServerController(myStage);
-					controller.setMainMenuScene(joinButton.getScene());
-					loader.setController(controller);
-					Parent root = loader.load();
-					this.clientScene = new Scene(root);
-				}
-				myStage.setScene(clientScene);
+				URL location = getClass().getResource("client/JoinServer.fxml");
+				FXMLLoader loader = new FXMLLoader(location);
+				JoinServerController controller = new JoinServerController(myStage);
+				controller.setMainMenuScene(joinButton.getScene());
+				loader.setController(controller);
+				Parent root = loader.load();
+				Scene joinscene = new Scene(root);
+				myStage.setScene(joinscene);
 			} catch (IOException e) {
 				e.printStackTrace();
 		
@@ -89,6 +76,10 @@ public class MainMenuController {
 		
 			}
 		});
+		
+		ControllerFunctions.buttonActionEnter(joinButton);
+		ControllerFunctions.buttonActionEnter(hostButton);
+		ControllerFunctions.buttonActionEnter(adminButton);
 		
 	}
 

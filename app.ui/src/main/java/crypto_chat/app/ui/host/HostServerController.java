@@ -2,13 +2,12 @@ package crypto_chat.app.ui.host;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-
 import crypto_chat.app.core.globals.ControllerFunctions;
 import crypto_chat.app.core.globals.NetworkDefaults;
 import crypto_chat.app.core.settings.Settings;
 import crypto_chat.app.core.settings.SettingsFactory;
 import crypto_chat.app.core.util.Alerter;
-
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
@@ -31,7 +30,7 @@ public class HostServerController {
 	@FXML Button cancelButton, hostButton;
 	@FXML Label statusLabel;
 	@FXML CheckBox portCheckbox;
-	@FXML TextField serverNameField, serverPasswordField, serverPortField;
+	@FXML TextField hostNameField, serverNameField, serverPasswordField, serverPortField;
 	
 	public HostServerController(Stage stage) {
 		myStage = stage;
@@ -42,8 +41,7 @@ public class HostServerController {
 		settings = SettingsFactory.getSettings();
 		
 		if(settings != null) {
-			serverNameField.setText(settings.getServer_name());
-			serverPasswordField.setText(settings.getServer_password());
+			loadSettings();
 		}
 				
 		serverPortField.setText(NetworkDefaults.PORT);
@@ -141,7 +139,7 @@ public class HostServerController {
 		ControllerFunctions.fieldFireButton(serverPortField, hostButton);
 		
 		validateFields();
-		
+	
 	}
 	
 	private ServerSocket setupServer(String port) {
@@ -171,7 +169,8 @@ public class HostServerController {
 	
 	private void initializeLobbyUI(ServerSocket serversocket) {
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("ChatHost.fxml"));
-		ChatHostController controller = new ChatHostController(myStage, serversocket, serverNameField.getText(), serverPasswordField.getText());
+		ChatHostController controller = new ChatHostController(myStage, serversocket, hostNameField.getText(), serverNameField.getText(), serverPasswordField.getText());
+		controller.setMainMenuScene(mainMenuScene);
 		loader.setController(controller);
 		Parent root;
 		try {
@@ -208,6 +207,27 @@ public class HostServerController {
 		portCheckbox.setDisable(disable);
 		hostButton.setDisable(disable);
 		cancelButton.setDisable(disable);
+	}
+	
+	private void loadSettings() {
+		String saveName = settings.getHost_name();
+		String saveServerName = settings.getServer_name();
+		serverNameField.setText(saveServerName);
+		hostNameField.setText(saveName);
+		
+		if("".equals(saveName)) {
+			Platform.runLater(() -> {
+				hostNameField.requestFocus();
+			});
+		} else if("".equals(saveServerName)) {
+			Platform.runLater(() -> {
+				serverNameField.requestFocus();
+			});
+		} else {
+			Platform.runLater(() -> {
+				serverPasswordField.requestFocus();
+			});
+		}
 	}
 	
 	public void setMainMenuScene(Scene scene) {

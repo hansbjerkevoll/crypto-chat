@@ -65,7 +65,7 @@ public class Alerter {
         };
         run(r);
     }
-   
+    
     /**
      * Show a simple information dialog
      *
@@ -128,6 +128,14 @@ public class Alerter {
         } else {
             Platform.runLater(r);
         }
+    }
+    
+    public static Optional<ButtonType> confirmation(String header, String message){
+    	Alert alert = new Alert(AlertType.CONFIRMATION);
+        alert.setTitle("Error Dialog");
+        alert.setHeaderText(header);
+        alert.setContentText(message);
+        return alert.showAndWait();
     }
 
 }

@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" prefHeight="750.0" prefWidth="950.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<VBox alignment="CENTER" prefHeight="750.0" prefWidth="950.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <Label text="Settings">
          <font>
@@ -38,12 +38,6 @@
                               <TextField fx:id="serverNameField" />
                            </children>
                         </VBox>
-                        <VBox spacing="2.0">
-                           <children>
-                              <Label text="Server password:" />
-                              <TextField fx:id="serverPasswordField" />
-                           </children>
-                        </VBox>
                      </children>
                   </VBox>
                   <VBox spacing="5.0">
@@ -61,20 +55,15 @@
                               <TextField fx:id="ipField" />
                            </children>
                         </VBox>
-                        <VBox spacing="2.0">
-                           <children>
-                              <Label text="Server password:" />
-                              <TextField fx:id="joinPasswordField" />
-                           </children>
-                        </VBox>
                      </children>
                   </VBox>
+                  <Button fx:id="saveButton" defaultButton="true" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Save Settings" />
+                  <Button fx:id="restoreButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Restore to default settings" />
                   <Separator prefWidth="200.0">
                      <VBox.margin>
                         <Insets bottom="5.0" top="5.0" />
                      </VBox.margin>
                   </Separator>
-                  <Button fx:id="saveButton" defaultButton="true" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Save Settings" />
                   <Button fx:id="backButton" cancelButton="true" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Go back">
                      <VBox.margin>
                         <Insets />
@@ -83,6 +72,9 @@
                </children>
             </VBox>
          </children>
+         <VBox.margin>
+            <Insets top="-92.0" />
+         </VBox.margin>
       </HBox>
    </children>
 </VBox>

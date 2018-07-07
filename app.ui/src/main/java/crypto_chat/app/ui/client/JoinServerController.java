@@ -8,8 +8,10 @@ import crypto_chat.app.core.settings.Settings;
 import crypto_chat.app.core.settings.SettingsFactory;
 import crypto_chat.app.core.util.Alerter;
 import crypto_chat.app.ui.server.ClientSocketHandler;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -29,7 +31,7 @@ public class JoinServerController {
 	@FXML Button cancelButton, connectButton;
 	@FXML Label statusLabel;
 	@FXML CheckBox portCheckbox;
-	@FXML TextField serverIPField, serverPasswordField, serverPortField;
+	@FXML TextField clientNameField, serverIPField, serverPasswordField, serverPortField;
 	
 	String port_field = null;
 	
@@ -42,8 +44,7 @@ public class JoinServerController {
 		settings = SettingsFactory.getSettings();
 		
 		if(settings != null) {
-			serverIPField.setText(settings.getIp_address());
-			serverPasswordField.setText(settings.getJoin_password());
+			loadSettings();
 		}
 		
 		
@@ -53,7 +54,7 @@ public class JoinServerController {
 		connectButton.setDisable(true);
 				
 		connectButton.setOnAction(ae -> {	
-			/*
+			
 			Task<Void> update_task = new Task<Void>() {
 
 				@Override
@@ -86,22 +87,6 @@ public class JoinServerController {
 				}
 				
 			});
-			*/
-			
-			
-			String ip_address = serverIPField.getText();
-			String port = serverPortField.getText();
-			String password = serverPasswordField.getText();
-			Socket socket = establishConnection(ip_address, port, password);
-			if(socket != null) {
-				initializeChatUI(socket);
-			}
-			else {
-				statusLabel.setText("Could connect with " + ip_address + " : " + port);
-				statusLabel.setStyle("-fx-text-fill:Red");
-				disableGUI(false);
-			}
-			
 			
 		});
 		
@@ -180,7 +165,8 @@ public class JoinServerController {
 	private void initializeChatUI(Socket serversocket) {
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("ChatClient.fxml"));
 		ClientSocketHandler socketHandler = new ClientSocketHandler(serversocket);
-		ChatClientController controller = new ChatClientController(socketHandler);
+		ChatClientController controller = new ChatClientController(socketHandler, clientNameField.getText(), serverPasswordField.getText());
+		controller.setMainMenuScene(mainMenuScene);
 		loader.setController(controller);
 		
 		Parent root;
@@ -216,6 +202,27 @@ public class JoinServerController {
 		portCheckbox.setDisable(disable);
 		connectButton.setDisable(disable);
 		cancelButton.setDisable(disable);
+	}
+	
+	private void loadSettings() {
+		String saveName = settings.getClient_name();
+		String saveIP = settings.getIp_address();
+		serverIPField.setText(saveIP);
+		clientNameField.setText(saveName);
+		
+		if("".equals(saveName)) {
+			Platform.runLater(() -> {
+				clientNameField.requestFocus();
+			});
+		} else if("".equals(saveIP)) {
+			Platform.runLater(() -> {
+				serverIPField.requestFocus();
+			});
+		} else {
+			Platform.runLater(() -> {
+				serverPasswordField.requestFocus();
+			});
+		}
 	}
 	
 	public void setMainMenuScene(Scene scene) {

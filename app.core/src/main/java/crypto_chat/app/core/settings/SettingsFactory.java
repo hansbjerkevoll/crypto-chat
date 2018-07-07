@@ -19,7 +19,6 @@ public class SettingsFactory {
 	 */
 	private static final String KEY_HOST_NAME = "host_name";
 	private static final String KEY_SERVER_NAME = "server_name";
-	private static final String KEY_SERVER_PASSWORD = "server_password";
 	
 	/**
 	 * Join settings
@@ -27,7 +26,6 @@ public class SettingsFactory {
 	
 	private static final String KEY_CLIENT_NAME = "client_name";
 	private static final String KEY_IP_ADDRESS = "ip_address";
-	private static final String KEY_JOIN_PASSWORD = "join_password";
 	
 	
 	private static Settings settings = null;
@@ -44,11 +42,9 @@ public class SettingsFactory {
 				p.load(is);
 				String host_name = p.getProperty(KEY_HOST_NAME);
 				String server_name = p.getProperty(KEY_SERVER_NAME);
-				String server_password = p.getProperty(KEY_SERVER_PASSWORD);
 				String client_name = p.getProperty(KEY_CLIENT_NAME);
 				String ip_address = p.getProperty(KEY_IP_ADDRESS);
-				String join_password = p.getProperty(KEY_JOIN_PASSWORD);
-				settings = new Settings(host_name, server_name,  server_password, client_name, ip_address, join_password);
+				settings = new Settings(host_name, server_name,  client_name, ip_address);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -73,10 +69,8 @@ public class SettingsFactory {
 			Properties p = new Properties();
 			p.setProperty(KEY_HOST_NAME, settings.getHost_name());
 			p.setProperty(KEY_SERVER_NAME, settings.getServer_name());
-			p.setProperty(KEY_SERVER_PASSWORD, settings.getServer_password());
 			p.setProperty(KEY_CLIENT_NAME, settings.getClient_name());
 			p.setProperty(KEY_IP_ADDRESS, settings.getIp_address());
-			p.setProperty(KEY_JOIN_PASSWORD, settings.getJoin_password());
 			
 			p.store(fos, " Crypto Chat Settings:");
 		}

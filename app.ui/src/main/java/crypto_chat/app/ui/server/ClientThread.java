@@ -96,6 +96,9 @@ public class ClientThread implements Runnable {
 	}
 	
 	public String getName() {
+		if(name == null) {
+			return "N/A";
+		}
 		return name;
 	}
 	
@@ -103,7 +106,7 @@ public class ClientThread implements Runnable {
 		return clientSocket.getInetAddress().getHostAddress();
 	}
 
-	public void sendMessage(String msg) {
+	public void sendMessageToClient(String msg) {
 		synchronized (this) {
 			messageToClient.offer(msg);
 			this.notifyAll();

@@ -8,22 +8,18 @@ public class Settings {
 	 */
 	private String host_name;
 	private String server_name;
-	private String server_password;
 	
 	/**
 	 * Join settings
 	 */
 	private String client_name;
 	private String ip_address;
-	private String join_password;
 	
-	public Settings(String host_name, String server_name, String server_password, String join_name, String ip_address, String join_password) {
+	public Settings(String host_name, String server_name, String join_name, String ip_address) {
 		this.host_name = host_name;
 		this.server_name = server_name;
-		this.server_password = server_password;
 		this.client_name = join_name;
 		this.ip_address = ip_address;
-		this.join_password = join_password;
 	}
 	
 	public String getHost_name() {
@@ -42,14 +38,6 @@ public class Settings {
 		this.server_name = server_name;
 	}
 	
-	public String getServer_password() {
-		return server_password;
-	}
-	
-	public void setServer_password(String server_password) {
-		this.server_password = server_password;
-	}
-	
 	public String getClient_name() {
 		return client_name;
 	}
@@ -64,14 +52,6 @@ public class Settings {
 	
 	public void setIp_address(String ip_address) {
 		this.ip_address = ip_address;
-	}
-	
-	public String getJoin_password() {
-		return join_password;
-	}
-	
-	public void setJoin_password(String join_password) {
-		this.join_password = join_password;
 	}
 	
 }
