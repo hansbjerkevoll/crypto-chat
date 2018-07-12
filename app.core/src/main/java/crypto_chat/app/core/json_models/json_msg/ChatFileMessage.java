@@ -1,22 +1,21 @@
 package crypto_chat.app.core.json_models.json_msg;
 
+import crypto_chat.app.core.json_models.MessageType;
 import java.io.File;
 
-import crypto_chat.app.core.json_models.MessageType;
-
 public class ChatFileMessage extends ChatMessage {
+
+	private File file_msg;
 	
-	private File file;
-
-	public ChatFileMessage(String senderName, File file, Long timeStamp) {
+	public ChatFileMessage(String sender, File file_msg, long timestamp) {
 		messageType = MessageType.FILE_MESSAGE;
-		this.senderName = senderName;
-		this.file = file;
-		this.timeStamp = timeStamp;
+		this.sender = sender;
+		this.file_msg = file_msg;
+		this.timestamp = timestamp;
 	}
-
-	public File getFile() {
-		return this.file;
+	
+	public File getFileMessage() {
+		return file_msg;
 	}
-
+	
 }

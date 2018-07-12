@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -48,6 +49,7 @@ public class JoinServerController {
 	String port_field = null;
 	
 	String givenServername = null;
+	ArrayList<String> givenChatHistory = new ArrayList<>();
 	
 	public JoinServerController(Stage stage) {
 		myStage = stage;
@@ -60,7 +62,6 @@ public class JoinServerController {
 		if(settings != null) {
 			loadSettings();
 		}
-		
 		
 		serverPortField.setText(NetworkDefaults.PORT);
 		serverPortField.setDisable(true);
@@ -190,7 +191,6 @@ public class JoinServerController {
 			toServer.println(json);
 			
 			String server_response = fromServer.readLine();
-			System.out.println(server_response);
 			JsonElement jsonElement = new JsonParser().parse(server_response);
 			MessageType type = GetPackageHeader.getPackageHeader(jsonElement);
 			Gson gson = new Gson();
@@ -198,6 +198,7 @@ public class JoinServerController {
 				ClientConnectionResponse cm = gson.fromJson(jsonElement, ClientConnectionResponse.class);
 				if(cm.isAccepted()) {
 					this.givenServername = cm.getServername();
+					this.givenChatHistory = cm.getChatMessageLog();
 					return true;
 				} else {
 					Alerter.error("Failed to connect", cm.getResponseMsg());
@@ -217,6 +218,7 @@ public class JoinServerController {
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("ChatClient.fxml"));
 		ClientSocketHandler socketHandler = new ClientSocketHandler(serversocket);
 		ChatClientController controller = new ChatClientController(socketHandler, clientNameField.getText(), givenServername, serverPasswordField.getText());
+		controller.setChatMessageLog(givenChatHistory);
 		controller.setMainMenuScene(mainMenuScene);
 		loader.setController(controller);
 		

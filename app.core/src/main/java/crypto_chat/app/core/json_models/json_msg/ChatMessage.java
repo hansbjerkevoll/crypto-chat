@@ -4,15 +4,15 @@ import crypto_chat.app.core.json_models.JsonPackage;
 
 public abstract class ChatMessage extends JsonPackage {
 	
-	protected String senderName;
-	protected long timeStamp;
+	protected String sender;
+	protected long timestamp;
 
-	public String getSenderName() {
-		return this.senderName;
+	public String getSender() {
+		return this.sender;
 	}
 	
 	public Long getTimeStamp() {
-		return this.timeStamp;
+		return this.timestamp;
 	}
 
 }

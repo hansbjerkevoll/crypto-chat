@@ -1,5 +1,6 @@
 package crypto_chat.app.ui.host;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import crypto_chat.app.core.globals.ControllerFunctions;
@@ -19,7 +20,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.FileChooser.ExtensionFilter;
 
 public class HostServerController {
 	
@@ -27,10 +31,13 @@ public class HostServerController {
 	private Scene mainMenuScene;
 	private Settings settings;
 	
-	@FXML Button cancelButton, hostButton;
-	@FXML Label statusLabel;
+	@FXML Button loadChatButton, cancelButton, hostButton;
+	@FXML Label statusLabel, chatFileLabel;
 	@FXML CheckBox portCheckbox;
 	@FXML TextField hostNameField, serverNameField, serverPasswordField, serverPortField;
+	
+	private String directoryPath;
+	private File chatHistory;
 	
 	public HostServerController(Stage stage) {
 		myStage = stage;
@@ -127,6 +134,10 @@ public class HostServerController {
 		    }
 		});
 		
+		loadChatButton.setOnAction(ae -> {
+			selectChatFile();
+		});
+		
 		addValidateListener(serverNameField);
 		addValidateListener(serverPasswordField);
 		addValidateListener(serverPortField);
@@ -140,6 +151,24 @@ public class HostServerController {
 		
 		validateFields();
 	
+	}
+	
+	private void selectChatFile() {
+		FileChooser filechooser = new FileChooser();
+		filechooser.setTitle("Open Resource File");
+		filechooser.getExtensionFilters()
+				.addAll(new ExtensionFilter("Chat files", "*.txt"));
+		if(directoryPath != null) {
+			filechooser.setInitialDirectory(new File(directoryPath));
+		}
+
+		File selectedFile = filechooser.showOpenDialog(myStage);
+		if (selectedFile != null) {
+			String filepath = selectedFile.getAbsolutePath().replace("\\\\", "/");
+			directoryPath = selectedFile.getParent();
+			chatHistory = selectedFile;
+			chatFileLabel.setText(selectedFile.getName());
+		}
 	}
 	
 	private ServerSocket setupServer(String port) {

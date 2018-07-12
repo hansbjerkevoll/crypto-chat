@@ -16,7 +16,6 @@ import com.google.gson.JsonParser;
 import crypto_chat.app.core.globals.ControllerFunctions;
 import crypto_chat.app.core.globals.Threads;
 import crypto_chat.app.core.json_models.MessageType;
-import crypto_chat.app.core.json_models.json_msg.ChatMessage;
 import crypto_chat.app.core.json_models.json_msg.ChatTextMessage;
 import crypto_chat.app.core.json_models.json_msg.ClientConnectionRequest;
 import crypto_chat.app.core.json_models.json_msg.ClientConnectionResponse;
@@ -75,7 +74,7 @@ public class ChatHostController {
 	
 	private ObservableList<ObservableClient> clients = FXCollections.observableArrayList();
 	private ArrayList<String> clientNames = new ArrayList<>();
-	private ArrayList<ChatMessage> chatHistory = new ArrayList<>();
+	private ArrayList<String> chatHistory = new ArrayList<>();
 	
 	public ChatHostController(Stage stage, ServerSocket serverSocket, String hostName, String serverName, String serverPassword) {
 		this.myStage = stage;
@@ -144,7 +143,7 @@ public class ChatHostController {
 				} else if(!message.equals("")) {
 					long timestamp = System.currentTimeMillis();
 					newMessage(hostName, message, timestamp);
-					sendNewMessage(hostName, message, timestamp);
+					sendNewTextMessage(hostName, message, timestamp);
 					chatMessageArea.clear();
 				}	
 			}
@@ -156,9 +155,10 @@ public class ChatHostController {
 		
 	}
 	
-	public void sendNewMessage(String name, String message, long timestamp) {
+	public void sendNewTextMessage(String name, String message, long timestamp) {
 		ChatTextMessage cm = new ChatTextMessage(name, message, timestamp);
 		String json = new Gson().toJson(cm);
+		chatHistory.add(json);
 		sendJSONToAllClients(json);
 	}
 	
@@ -187,16 +187,15 @@ public class ChatHostController {
 				switch(type) {
 				case TEXT_MESSAGE:
 					ChatTextMessage cm = gson.fromJson(jsonElement, ChatTextMessage.class);
-					chatHistory.add(cm);
-					newMessage(cm.getSenderName(), cm.getMessage(), cm.getTimeStamp());
-					forwardChatMessage(msg, cm.getSenderName());
+					chatHistory.add(msg);
+					newMessage(cm.getSender(), cm.getTextMessage(), cm.getTimeStamp());
+					forwardChatMessage(msg, cm.getSender());
 					break;
 				case CLOSED:
 					break;
-				case WELCOME:
-					break;
 				case CONNECTION_REQUEST:
 					ClientConnectionRequest request = gson.fromJson(jsonElement, ClientConnectionRequest.class);
+					clientThread.setName(request.getClientName());
 					boolean accepted = false;
 					boolean available_name = checkNameAvailability(request.getClientName());
 					boolean correct_pwd = request.getHashedPassword().equals(serverPassword);
@@ -207,12 +206,10 @@ public class ChatHostController {
 					} else if (!correct_pwd) {
 						response_msg = "Incorrect password";
 					} 
-			
 					
 					if(available_name && correct_pwd) {
 						accepted = true;
 						response_msg = "Access granted";
-						clientThread.setName(request.getClientName());
 						ObservableClient client = new ObservableClient(clientThread);
 						clientThread.setObservableClient(client);
 						clients.add(client);
@@ -226,8 +223,13 @@ public class ChatHostController {
 						}
 					}
 					
-					ClientConnectionResponse response = new ClientConnectionResponse(accepted, serverName, response_msg);
+					ClientConnectionResponse response = new ClientConnectionResponse(accepted, response_msg);
+					if(accepted) {
+						response.setServername(serverName);
+						response.setChatMessageLog(chatHistory);
+					}
 					String json = new Gson().toJson(response);
+					System.out.println(json);
 					clientThread.sendMessageToClient(json);
 					break;
 				default:

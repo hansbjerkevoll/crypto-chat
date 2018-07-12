@@ -1,5 +1,6 @@
 package crypto_chat.app.ui.client;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 import com.google.gson.Gson;
@@ -9,7 +10,6 @@ import com.google.gson.JsonParser;
 import crypto_chat.app.core.globals.Threads;
 import crypto_chat.app.core.json_models.MessageType;
 import crypto_chat.app.core.json_models.json_msg.ChatTextMessage;
-import crypto_chat.app.core.json_models.json_msg.WelcomeMessage;
 import crypto_chat.app.core.util.GetPackageHeader;
 import crypto_chat.app.core.util.RunOnJavaFX;
 import crypto_chat.app.core.util.TimedTask;
@@ -28,10 +28,11 @@ import javafx.util.Duration;
 
 public class ChatClientController {
 
-	Scene mainMenuScene;
+	private Scene mainMenuScene;
 	
-	ClientSocketHandler socketHandler;
-	String clientName, serverName, serverPassword;
+	private ClientSocketHandler socketHandler;
+	private String clientName, serverName, serverPassword;
+	private ArrayList<String> chatMessageLog;
 	
 	@FXML TextField serverIPField, serverPortField, serverHiddenPassword, serverShownPassword; 
 	@FXML Label serverNameLabel;
@@ -81,12 +82,32 @@ public class ChatClientController {
 					chatMessageArea.positionCaret(chatMessageArea.getText().length());
 				} else if(!message.equals("")) {
 					long timestamp = System.currentTimeMillis();
-					sendChatMessageToServer(message, timestamp);
-					newMessage(clientName, message, timestamp);
+					sendChatTextMessageToServer(message, timestamp);
+					newTextMessage(clientName, message, timestamp);
 					chatMessageArea.clear();
 				}	
 			}
 		});
+		
+		// Load Chat Log
+		if(chatMessageLog != null) {
+			Gson gson = new Gson();
+			for(String chat_msg : chatMessageLog) {
+				System.out.println(chat_msg);
+				JsonElement jsonElement = new JsonParser().parse(chat_msg);
+				MessageType type = GetPackageHeader.getPackageHeader(jsonElement);
+				System.out.println(type);
+				switch(type) {
+				case TEXT_MESSAGE:
+					ChatTextMessage text_msg = gson.fromJson(jsonElement, ChatTextMessage.class);
+					newTextMessage(text_msg.getSender(), text_msg.getTextMessage(), text_msg.getTimeStamp());
+					break;
+				default:
+					break;
+				}
+				
+			}
+		}
 		
 		// Start the socket thread
 		Thread t = new Thread(socketHandler, "ClientSocketThread");
@@ -105,13 +126,9 @@ public class ChatClientController {
 				switch(type) {
 				case TEXT_MESSAGE:
 					ChatTextMessage cm = gson.fromJson(jsonElement, ChatTextMessage.class);
-					newMessage(cm.getSenderName(), cm.getMessage(), cm.getTimeStamp());
+					newTextMessage(cm.getSender(), cm.getTextMessage(), cm.getTimeStamp());
 					break;
 				case CLOSED:
-					break;
-				case WELCOME:
-					WelcomeMessage wm = gson.fromJson(jsonElement, WelcomeMessage.class);
-					serverNameLabel.setText(wm.getServerName());
 					break;
 				default:
 					break;
@@ -120,13 +137,13 @@ public class ChatClientController {
 		});
 	}
 	
-	public void sendChatMessageToServer(String message, long timestamp) {
+	public void sendChatTextMessageToServer(String message, long timestamp) {
 		ChatTextMessage cm = new ChatTextMessage(clientName, message, timestamp);
 		String json = new Gson().toJson(cm);
 		socketHandler.sendMessageToServer(json);
 	}
 	
-	private void newMessage(String header, String message, long timestamp) {		
+	private void newTextMessage(String header, String message, long timestamp) {		
 		Date msg_time = new Date(timestamp);
 		VBox messageBox = new VBox();
 		Label nameLabel = new Label(header + " [" + msg_time + "]");
@@ -141,6 +158,10 @@ public class ChatClientController {
 		TimedTask.runLater(new Duration(30), () -> {
 			chatRoomScroll.setVvalue(1.0);
 		});	
+	}
+	
+	public void setChatMessageLog(ArrayList<String> chatMessageLog) {
+		this.chatMessageLog = chatMessageLog;
 	}
 	
 	public void setMainMenuScene(Scene mainMenuScene) {
