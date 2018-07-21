@@ -3,11 +3,14 @@ package crypto_chat.app.ui.host;
 import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.ArrayList;
+
 import crypto_chat.app.core.globals.ControllerFunctions;
 import crypto_chat.app.core.globals.NetworkDefaults;
 import crypto_chat.app.core.settings.Settings;
 import crypto_chat.app.core.settings.SettingsFactory;
 import crypto_chat.app.core.util.Alerter;
+import crypto_chat.app.core.util.ChatHistory;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -20,7 +23,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser.ExtensionFilter;
@@ -37,7 +39,7 @@ public class HostServerController {
 	@FXML TextField hostNameField, serverNameField, serverPasswordField, serverPortField;
 	
 	private String directoryPath;
-	private File chatHistory;
+	private ArrayList<String> chatHistoryList;
 	
 	public HostServerController(Stage stage) {
 		myStage = stage;
@@ -97,8 +99,7 @@ public class HostServerController {
 				disableGUI(false);
 				
 			});
-			
-			
+		
 		});
 		
 		cancelButton.setOnAction(ae -> {
@@ -135,7 +136,12 @@ public class HostServerController {
 		});
 		
 		loadChatButton.setOnAction(ae -> {
-			selectChatFile();
+			try {
+				selectChatFile();
+			} catch (IOException e) {
+				Alerter.exception("Loading failed", "Failed to load chat history", e);
+			}
+			
 		});
 		
 		addValidateListener(serverNameField);
@@ -153,7 +159,7 @@ public class HostServerController {
 	
 	}
 	
-	private void selectChatFile() {
+	private void selectChatFile() throws IOException {
 		FileChooser filechooser = new FileChooser();
 		filechooser.setTitle("Open Resource File");
 		filechooser.getExtensionFilters()
@@ -164,10 +170,9 @@ public class HostServerController {
 
 		File selectedFile = filechooser.showOpenDialog(myStage);
 		if (selectedFile != null) {
-			String filepath = selectedFile.getAbsolutePath().replace("\\\\", "/");
 			directoryPath = selectedFile.getParent();
-			chatHistory = selectedFile;
 			chatFileLabel.setText(selectedFile.getName());
+			chatHistoryList = ChatHistory.readHistoryFromFile(selectedFile);
 		}
 	}
 	
@@ -199,6 +204,8 @@ public class HostServerController {
 	private void initializeLobbyUI(ServerSocket serversocket) {
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("ChatHost.fxml"));
 		ChatHostController controller = new ChatHostController(myStage, serversocket, hostNameField.getText(), serverNameField.getText(), serverPasswordField.getText());
+		//System.out.println(chatHistoryList.size());
+		if(chatHistoryList != null) controller.setChatHistory(chatHistoryList);	
 		controller.setMainMenuScene(mainMenuScene);
 		loader.setController(controller);
 		Parent root;
@@ -230,6 +237,7 @@ public class HostServerController {
 	}
 	
 	private void disableGUI(boolean disable) {
+		hostNameField.setDisable(disable);
 		serverNameField.setDisable(disable);
 		serverPasswordField.setDisable(disable);
 		serverPortField.setDisable(portCheckbox.isSelected() ? true : disable);
@@ -241,8 +249,10 @@ public class HostServerController {
 	private void loadSettings() {
 		String saveName = settings.getHost_name();
 		String saveServerName = settings.getServer_name();
+		String historyLocation = settings.getHistory_location();
 		serverNameField.setText(saveServerName);
 		hostNameField.setText(saveName);
+		directoryPath = historyLocation == null || "".equals(historyLocation) ? null : historyLocation;
 		
 		if("".equals(saveName)) {
 			Platform.runLater(() -> {

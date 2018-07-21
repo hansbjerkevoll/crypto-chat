@@ -1,5 +1,6 @@
 package crypto_chat.app.ui.admin.settings;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -12,16 +13,22 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextField;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 
 public class SettingsController {
 	
+	private Stage myStage;
 	private Scene adminMenuScene;
 	
 	private Settings current_settings;
 	
-	@FXML Button saveButton, restoreButton, backButton;
-	@FXML TextField hostNameField, serverNameField, clientNameField, ipField;
+	@FXML Button loadChatButton, saveButton, restoreButton, backButton;
+	@FXML TextField chatLocationField, hostNameField, serverNameField, clientNameField, ipField;
+	
+	public SettingsController(Stage stage) {
+		this.myStage = stage;
+	}
 	
 	public void initialize() {		
 		
@@ -30,19 +37,33 @@ public class SettingsController {
 		current_settings = SettingsFactory.getSettings();
 		
 		if(current_settings != null) {
+			chatLocationField.setText(current_settings.getHistory_location() == null ? "" : current_settings.getHistory_location());
 			hostNameField.setText(current_settings.getHost_name());
 			serverNameField.setText(current_settings.getServer_name());
 			clientNameField.setText(current_settings.getClient_name());
 			ipField.setText(current_settings.getIp_address());
 		}
 		
+		loadChatButton.setOnAction(ae -> {
+			DirectoryChooser chooser = new DirectoryChooser();
+			chooser.setTitle("Select default chat history directory");
+			if(!chatLocationField.getText().equals("")) {
+				chooser.setInitialDirectory(new File(chatLocationField.getText()));
+			}			
+			File selectedDirectory = chooser.showDialog(myStage);
+			if(selectedDirectory != null) {
+				chatLocationField.setText(selectedDirectory.getAbsolutePath());
+			}
+		});
+		
 		saveButton.setOnAction(ae -> {
+			String history_location = chatLocationField.getText();
 			String host_name = hostNameField.getText();
 			String server_name = serverNameField.getText();
 			String client_name = clientNameField.getText();
 			String ip_address = ipField.getText();
 			
-			Settings settings = new Settings(host_name, server_name, client_name, ip_address);
+			Settings settings = new Settings(history_location, host_name, server_name, client_name, ip_address);
 			
 			try {
 				SettingsFactory.saveSettingsLocalFile(settings);
@@ -57,12 +78,13 @@ public class SettingsController {
 			Optional<ButtonType> result = Alerter.confirmation("Restore settings?", "Are you sure you want to restore your settings to their default values?"
 					+ "This will delete all changes you have made.");
 			if(result.get() == ButtonType.OK) {
+				chatLocationField.setText("");
 				hostNameField.setText("");
 				serverNameField.setText("");
 				clientNameField.setText("");
 				ipField.setText("");
 				try {
-					SettingsFactory.saveSettingsLocalFile(new Settings("", "", "", ""));
+					SettingsFactory.saveSettingsLocalFile(new Settings("", "", "", "", ""));
 				} catch (IOException e) {
 					Alerter.exception(null, "Failed to save settings...", e);
 				}
@@ -78,6 +100,7 @@ public class SettingsController {
 		ControllerFunctions.buttonActionEnter(saveButton);
 		ControllerFunctions.buttonActionEnter(backButton);
 		
+		enableSave(chatLocationField);
 		enableSave(hostNameField);
 		enableSave(serverNameField);
 		enableSave(clientNameField);

@@ -6,7 +6,6 @@ import com.google.gson.Gson;
 import crypto_chat.app.core.json_models.json_msg.*;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.scene.image.Image;
 
 public class ObservableClient {
 	
@@ -26,19 +25,19 @@ public class ObservableClient {
 	}
 	
 	public void sendChatTextMessage(String clientName, String message, long timestamp) {
-		ChatTextMessage cm = new ChatTextMessage(clientName, message, timestamp);
+		ChatMessageText cm = new ChatMessageText(clientName, message, timestamp);
 		String json = new Gson().toJson(cm);
 		this.client.sendMessageToClient(json);
 	}
 	
-	public void sendChatImageMessage(String clientName, Image image, long timestamp) {
-		ChatImageMessage im = new ChatImageMessage(clientName, image, timestamp);
+	public void sendChatImageMessage(String clientName, byte[] image_bytes, long timestamp) {
+		ChatMessageImage im = new ChatMessageImage(clientName, image_bytes, timestamp);
 		String json = new Gson().toJson(im);
 		this.client.sendMessageToClient(json);
 	}
 	
 	public void sendChatFileMessage(String clientName, File file, long timestamp) {
-		ChatFileMessage fm = new ChatFileMessage(clientName, file, timestamp);
+		ChatMessageFile fm = new ChatMessageFile(clientName, file, timestamp);
 		String json = new Gson().toJson(fm);
 		this.client.sendMessageToClient(json);
 	}

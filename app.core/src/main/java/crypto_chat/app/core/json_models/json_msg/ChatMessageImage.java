@@ -1,22 +1,25 @@
 package crypto_chat.app.core.json_models.json_msg;
 
+import java.io.ByteArrayInputStream;
+
 import crypto_chat.app.core.json_models.MessageType;
 import javafx.scene.image.Image;
 
-public class ChatImageMessage extends ChatMessage {
+public class ChatMessageImage extends ChatMessage {
 	
-	private Image image_msg;
+	private  byte[] image_bytes;
 	
-	public ChatImageMessage(String sender, Image image_msg, long timestamp) {
+	public ChatMessageImage(String sender, byte[] image, long timestamp) {
+		
 		messageType = MessageType.IMAGE_MESSAGE;
 		this.sender = sender;
-		this.image_msg = image_msg;
+		this.image_bytes = image;
 		this.timestamp = timestamp;
 	}
 	
 
 	public Image getImageMessage() {
-		return image_msg;
+		return new Image(new ByteArrayInputStream(image_bytes));
 	}
 
 }

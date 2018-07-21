@@ -8,6 +8,7 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
@@ -16,13 +17,15 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="750.0" prefWidth="950.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<VBox prefHeight="750.0" prefWidth="950.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <MenuBar>
         <menus>
           <Menu mnemonicParsing="false" text="File">
             <items>
               <MenuItem fx:id="changeRoomButton" mnemonicParsing="false" text="Go to chat lobby" />
+                  <MenuItem fx:id="saveHistoryButton" mnemonicParsing="false" text="Save Chat History" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
                   <MenuItem fx:id="closeServerButton" mnemonicParsing="false" text="Close Server" />
             </items>
           </Menu>
@@ -75,7 +78,7 @@
             <Insets top="10.0" />
          </VBox.margin>
       </Label>
-      <Label fx:id="serverRoomLabel" alignment="CENTER" maxWidth="1.7976931348623157E308" text="Chat Server Lobby">
+      <Label fx:id="serverRoomLabel" alignment="CENTER" maxWidth="1.7976931348623157E308" text="Chat Server Room">
          <font>
             <Font size="16.0" />
          </font>

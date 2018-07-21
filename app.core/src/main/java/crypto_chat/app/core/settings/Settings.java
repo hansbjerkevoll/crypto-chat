@@ -2,6 +2,10 @@ package crypto_chat.app.core.settings;
 
 public class Settings {
 
+	/*
+	 * General settings
+	 */
+	private String history_location;
 	
 	/**
 	 * Host Settings
@@ -15,11 +19,20 @@ public class Settings {
 	private String client_name;
 	private String ip_address;
 	
-	public Settings(String host_name, String server_name, String join_name, String ip_address) {
+	public Settings(String history_location, String host_name, String server_name, String join_name, String ip_address) {
+		this.history_location = history_location;
 		this.host_name = host_name;
 		this.server_name = server_name;
 		this.client_name = join_name;
 		this.ip_address = ip_address;
+	}
+	
+	public String getHistory_location() {
+		return this.history_location;
+	}
+	
+	public void setHistory_location(String history_location) {
+		this.history_location = history_location;
 	}
 	
 	public String getHost_name() {

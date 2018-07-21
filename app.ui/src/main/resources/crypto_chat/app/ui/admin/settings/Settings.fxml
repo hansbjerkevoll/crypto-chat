@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" prefHeight="750.0" prefWidth="950.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<VBox alignment="CENTER" prefHeight="750.0" prefWidth="950.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <Label text="Settings">
          <font>
@@ -21,8 +21,28 @@
       </Label>
       <HBox alignment="CENTER" VBox.vgrow="ALWAYS">
          <children>
-            <VBox alignment="CENTER" maxWidth="200.0" prefWidth="200.0" spacing="10.0">
+            <VBox alignment="CENTER" maxWidth="250.0" prefWidth="250.0" spacing="10.0">
                <children>
+                  <VBox spacing="5.0">
+                     <children>
+                        <Label style="-fx-font-weight: bold;" text="General settings:" />
+                        <VBox spacing="2.0">
+                           <children>
+                              <Label text="Chat history location:" />
+                              <HBox spacing="5.0">
+                                 <children>
+                                    <Button fx:id="loadChatButton" mnemonicParsing="false" text="Browse...">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </Button>
+                                    <TextField fx:id="chatLocationField" prefHeight="25.0" prefWidth="193.0" />
+                                 </children>
+                              </HBox>
+                           </children>
+                        </VBox>
+                     </children>
+                  </VBox>
                   <VBox spacing="5.0">
                      <children>
                         <Label style="-fx-font-weight: bold;" text="Default Host Server Settings:" />

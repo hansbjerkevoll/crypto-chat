@@ -36,7 +36,7 @@ public class AdminMenuController {
 				if (settingsScene == null) {
 					URL location = getClass().getResource("settings/Settings.fxml");
 					FXMLLoader loader = new FXMLLoader(location);
-					SettingsController controller = new SettingsController();
+					SettingsController controller = new SettingsController(myStage);
 					controller.setAdminMenuScene(settingsButton.getScene());
 					loader.setController(controller);
 					Parent root = loader.load();

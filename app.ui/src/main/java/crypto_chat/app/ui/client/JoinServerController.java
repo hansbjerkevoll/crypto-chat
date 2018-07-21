@@ -217,7 +217,7 @@ public class JoinServerController {
 	private void initializeChatUI(Socket serversocket) {
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("ChatClient.fxml"));
 		ClientSocketHandler socketHandler = new ClientSocketHandler(serversocket);
-		ChatClientController controller = new ChatClientController(socketHandler, clientNameField.getText(), givenServername, serverPasswordField.getText());
+		ChatClientController controller = new ChatClientController(myStage, socketHandler, clientNameField.getText(), givenServername, serverPasswordField.getText());
 		controller.setChatMessageLog(givenChatHistory);
 		controller.setMainMenuScene(mainMenuScene);
 		loader.setController(controller);

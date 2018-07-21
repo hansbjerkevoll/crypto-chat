@@ -132,7 +132,7 @@ public class Alerter {
     
     public static Optional<ButtonType> confirmation(String header, String message){
     	Alert alert = new Alert(AlertType.CONFIRMATION);
-        alert.setTitle("Error Dialog");
+        alert.setTitle("Confirmation Dialog");
         alert.setHeaderText(header);
         alert.setContentText(message);
         return alert.showAndWait();

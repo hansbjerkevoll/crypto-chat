@@ -32,9 +32,7 @@ public class App extends Application{
 	
 	@Override
 	public void stop() throws Exception {
-		System.out.println("Interrupting all threads");
 		ControllerFunctions.stopServer();
-		System.out.println("Exiting...");
 	}
 
 }

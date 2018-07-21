@@ -22,6 +22,7 @@ public class ClientSocketHandler implements Runnable {
 	private PrintStream toServer;
 	private final Queue<String> messageToServer = new ArrayDeque<>();
 	private final Queue<String> messageFromServer = new ArrayDeque<>();
+	private Boolean disconnected = false;
 	
 	public ClientSocketHandler(Socket serverSocket) {
 		this.serverSocket = serverSocket;
@@ -52,6 +53,9 @@ public class ClientSocketHandler implements Runnable {
 					while ((line = messageToServer.poll()) != null) {
 						System.out.println(line);
 						toServer.println(line);
+					}
+					if(disconnected) {
+						Thread.currentThread().interrupt();
 					}
 				}
 			}
@@ -111,6 +115,10 @@ public class ClientSocketHandler implements Runnable {
 	
 	public void setController(ChatClientController controller) {
 		this.controller = controller;
+	}
+	
+	public void disconnect() {
+		disconnected = true;
 	}
 	
 }

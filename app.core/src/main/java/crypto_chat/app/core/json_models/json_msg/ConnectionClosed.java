@@ -10,6 +10,6 @@ import crypto_chat.app.core.json_models.MessageType;
  */
 public class ConnectionClosed extends JsonPackage {
 	public ConnectionClosed() {
-		messageType = MessageType.CLOSED;
+		messageType = MessageType.CONNECTION_CLOSED;
 	}
 }

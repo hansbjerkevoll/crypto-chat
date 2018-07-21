@@ -1,11 +1,11 @@
 package crypto_chat.app.ui.host;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.ServerSocket;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Optional;
 import java.util.Scanner;
 
@@ -13,23 +13,26 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
+import crypto_chat.app.core.globals.ChatFunctions;
 import crypto_chat.app.core.globals.ControllerFunctions;
 import crypto_chat.app.core.globals.Threads;
 import crypto_chat.app.core.json_models.MessageType;
-import crypto_chat.app.core.json_models.json_msg.ChatTextMessage;
+import crypto_chat.app.core.json_models.json_msg.ChatMessageText;
 import crypto_chat.app.core.json_models.json_msg.ClientConnectionRequest;
 import crypto_chat.app.core.json_models.json_msg.ClientConnectionResponse;
+import crypto_chat.app.core.json_models.json_msg.ConnectionClosed;
 import crypto_chat.app.core.util.Alerter;
+import crypto_chat.app.core.util.ChatHistory;
+import crypto_chat.app.core.util.GetPackageHeader;
 import crypto_chat.app.core.util.RunOnJavaFX;
 import crypto_chat.app.core.util.TimedTask;
-import crypto_chat.app.core.util.GetPackageHeader;
 import crypto_chat.app.ui.server.ChatServer;
 import crypto_chat.app.ui.server.ClientThread;
 import crypto_chat.app.ui.server.ObservableClient;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
@@ -45,14 +48,16 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.util.Duration;
 
 public class ChatHostController {
 	
 	@FXML TextField serverIPField, serverPortField, serverShownPassword;
 	@FXML PasswordField serverHiddenPassword;
-	@FXML MenuItem changeRoomButton, closeServerButton;
+	@FXML MenuItem changeRoomButton, saveHistoryButton, closeServerButton;
 	@FXML Label serverNameLabel, serverRoomLabel;
 	@FXML TableView<ObservableClient> tableviewClients;
 	@FXML TableColumn<ObservableClient, String> tablecolumnName;
@@ -142,7 +147,10 @@ public class ChatHostController {
 					chatMessageArea.positionCaret(chatMessageArea.getText().length());
 				} else if(!message.equals("")) {
 					long timestamp = System.currentTimeMillis();
-					newMessage(hostName, message, timestamp);
+					ChatFunctions.newTextMessage(chatRoom, hostName, message, timestamp);
+					TimedTask.runLater(new Duration(30), () -> {
+						chatRoomScroll.setVvalue(1.0);
+					});
 					sendNewTextMessage(hostName, message, timestamp);
 					chatMessageArea.clear();
 				}	
@@ -150,30 +158,60 @@ public class ChatHostController {
 		});
 		
 		closeServerButton.setOnAction(ae -> {
-			closeServer();
+			if (closeServer() && mainMenuScene != null) {
+				myStage.setOnCloseRequest(null);
+				myStage.setScene(mainMenuScene);
+			}
 		});
 		
-	}
-	
-	public void sendNewTextMessage(String name, String message, long timestamp) {
-		ChatTextMessage cm = new ChatTextMessage(name, message, timestamp);
-		String json = new Gson().toJson(cm);
-		chatHistory.add(json);
-		sendJSONToAllClients(json);
-	}
-	
-	public void forwardChatMessage(String msg, String sender_name) {
-		for(ObservableClient client : clients) {
-			if(!sender_name.equals(client.getName())) {
-				client.sendJSONMessage(msg);
+		saveHistoryButton.setOnAction(ae -> {
+			FileChooser filechooser = new FileChooser();
+			filechooser.setTitle("Save Chat History");
+			ExtensionFilter filter = new ExtensionFilter("Text File", "*.txt");
+			filechooser.getExtensionFilters().add(filter);
+			filechooser.setSelectedExtensionFilter(filter);
+			File file = filechooser.showSaveDialog(myStage);
+			if(file != null) {
+				try {
+					ChatHistory.saveHistoryToLocalFile(chatHistory, file.getAbsolutePath());
+					Alerter.info("Chat history saved", "The chat history was saved to the local file: " + file.getAbsolutePath());
+				} catch (IOException e) {
+					Alerter.exception("Saving failed", "Could not save chat history to local file", e);
+				}
 			}
+		});
+		
+		myStage.setOnCloseRequest(e -> {
+			e.consume();
+			if (closeServer() && mainMenuScene != null) {
+				myStage.close();
+			}
+		});
+		
+		// Load Chat Log
+		if(chatHistory != null) {
+			Gson gson = new Gson();
+			for(String chat_msg : chatHistory) {
+				JsonElement jsonElement = new JsonParser().parse(chat_msg);
+				MessageType type = GetPackageHeader.getPackageHeader(jsonElement);
+				switch(type) {
+				case TEXT_MESSAGE:
+					ChatMessageText text_msg = gson.fromJson(jsonElement, ChatMessageText.class);
+					ChatFunctions.newTextMessage(chatRoom, text_msg.getSender(), text_msg.getTextMessage(), text_msg.getTimeStamp());
+					break;
+				default:
+					break;
+				}	
+			}
+			TimedTask.runLater(new Duration(30), () -> {
+				chatRoomScroll.setVvalue(1.0);
+			});	
 		}
-	}
-	
-	public void sendJSONToAllClients(String json) {
-		for(ObservableClient client : clients) {
-			client.sendJSONMessage(json);
-		}
+		
+		Platform.runLater(() -> {
+			chatMessageArea.requestFocus();
+		});
+		
 	}
 	
 	public void gotMessageFromClient(ClientThread clientThread) {
@@ -186,12 +224,17 @@ public class ChatHostController {
 				Gson gson = new Gson();
 				switch(type) {
 				case TEXT_MESSAGE:
-					ChatTextMessage cm = gson.fromJson(jsonElement, ChatTextMessage.class);
+					ChatMessageText cm = gson.fromJson(jsonElement, ChatMessageText.class);
 					chatHistory.add(msg);
-					newMessage(cm.getSender(), cm.getTextMessage(), cm.getTimeStamp());
+					ChatFunctions.newTextMessage(chatRoom, cm.getSender(), cm.getTextMessage(), cm.getTimeStamp());
+					TimedTask.runLater(new Duration(30), () -> {
+						chatRoomScroll.setVvalue(1.0);
+					});
 					forwardChatMessage(msg, cm.getSender());
 					break;
-				case CLOSED:
+				case CONNECTION_CLOSED:
+					removeClient(clientThread.getObservableClient());
+					clientThread.disconnectClient();
 					break;
 				case CONNECTION_REQUEST:
 					ClientConnectionRequest request = gson.fromJson(jsonElement, ClientConnectionRequest.class);
@@ -216,11 +259,7 @@ public class ChatHostController {
 						String newConnection = request.getClientName() + " (" + clientThread.getIP() + ") connected.";
 						newUpdate(newConnection);
 					} else {
-						try {
-							clientThread.disconnectClient();
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
+						clientThread.disconnectClient();
 					}
 					
 					ClientConnectionResponse response = new ClientConnectionResponse(accepted, response_msg);
@@ -229,10 +268,11 @@ public class ChatHostController {
 						response.setChatMessageLog(chatHistory);
 					}
 					String json = new Gson().toJson(response);
-					System.out.println(json);
 					clientThread.sendMessageToClient(json);
 					break;
 				default:
+					System.out.println("Unknown message type received: " + type);
+					System.out.println("Message was: " + msg);
 					break;
 				}
 				
@@ -240,8 +280,61 @@ public class ChatHostController {
 		});
 	}
 	
-	public void removeClient(ObservableClient observableClient) {
+	public void removeClient(ObservableClient client) {
+		RunOnJavaFX.run(() -> {
+			if(!clients.contains(client)) {
+				return;
+			}
+			newUpdate(client.getName() + " disconnected.");
+			clients.remove(client);
+		});
 		
+	}
+	
+	private void newUpdate(String updateText) {
+		listviewUpdates.getItems().add(0, updateText);
+	}
+	
+	public void sendNewTextMessage(String name, String message, long timestamp) {
+		ChatMessageText cm = new ChatMessageText(name, message, timestamp);
+		String json = new Gson().toJson(cm);
+		chatHistory.add(json);
+		sendJSONToAllClients(json);
+	}
+	
+	public void forwardChatMessage(String msg, String sender_name) {
+		for(ObservableClient client : clients) {
+			if(!sender_name.equals(client.getName())) {
+				client.sendJSONMessage(msg);
+			}
+		}
+	}
+	
+	public void sendJSONToAllClients(String json) {
+		for(ObservableClient client : clients) {
+			client.sendJSONMessage(json);
+		}
+	}
+	
+	private boolean closeServer() {
+		Optional<ButtonType> result = Alerter.confirmation("Close server", "Are you sure you wanna close the server?");
+		if(result.get() == ButtonType.OK) {
+			ConnectionClosed cc = new ConnectionClosed();
+			String json = new Gson().toJson(cc);
+			sendJSONToAllClients(json);
+			try {
+				ControllerFunctions.stopServer();
+			} catch (InterruptedException e) {
+				Alerter.exception(null, "An exception occured when closing the server", e);
+			}
+			try {
+				serverSocket.close();
+			} catch (IOException e) {
+				Alerter.exception(null, "An exception occured when closing the server", e);
+			}
+			return true;
+		} 
+		return false;
 	}
 	
 	private boolean checkNameAvailability(String name) {
@@ -269,46 +362,8 @@ public class ChatHostController {
 		return ip_text;
 	}
 	
-	private void newUpdate(String updateText) {
-		listviewUpdates.getItems().add(0, updateText);
-	}
-	
-	private void newMessage(String header, String message, long timestamp) {
-		
-		Date msg_time = new Date(timestamp);
-		VBox messageBox = new VBox();
-		Label nameLabel = new Label(header + " [" + msg_time + "]");
-		Label messageLabel = new Label(message);
-		messageBox.setMaxWidth(775);
-		messageBox.setPadding(new Insets(2));
-		nameLabel.setWrapText(true);
-		messageLabel.setWrapText(true);
-		nameLabel.setStyle("-fx-font-weight:Bold");
-		messageBox.getChildren().addAll(nameLabel, messageLabel);
-		chatRoom.getChildren().add(messageBox);
-		TimedTask.runLater(new Duration(30), () -> {
-			chatRoomScroll.setVvalue(1.0);
-		});	
-	}
-	
-	private void closeServer() {
-		Optional<ButtonType> result = Alerter.confirmation("Close server", "Are you sure you wanna close the server?");
-		if(result.get() == ButtonType.OK) {
-			try {
-				serverSocket.close();
-			} catch (IOException e) {
-				Alerter.exception(null, "An exception occured when closing the server", e);
-			}
-			try {
-				ControllerFunctions.stopServer();
-			} catch (InterruptedException e) {
-				Alerter.exception(null, "An exception occured when closing the server", e);
-			}
-			
-			if (mainMenuScene != null) {
-				myStage.setScene(mainMenuScene);
-			}
-		}   
+	public void setChatHistory(ArrayList<String> chatHistory) {
+		this.chatHistory = chatHistory;
 	}
 	
 	public void setMainMenuScene(Scene mainMenuScene) {

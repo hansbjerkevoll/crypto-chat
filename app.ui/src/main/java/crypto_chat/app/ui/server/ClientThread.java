@@ -66,8 +66,6 @@ public class ClientThread implements Runnable {
 					}
 					// Disconnect if disconnected
 					if(disconnected) {
-						toClient.close();
-						fromClient.close();
 						Thread.currentThread().interrupt();
 					}
 				}
@@ -126,7 +124,7 @@ public class ClientThread implements Runnable {
 		}
 	}
 	
-	public void disconnectClient() throws IOException {
+	public void disconnectClient() {
 		disconnected = true;
 	}
 
