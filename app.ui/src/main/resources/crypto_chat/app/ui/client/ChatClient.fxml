@@ -39,6 +39,12 @@
       </MenuBar>
       <HBox spacing="10.0">
          <children>
+            <Label text="Username:">
+               <HBox.margin>
+                  <Insets top="4.0" />
+               </HBox.margin>
+            </Label>
+            <TextField fx:id="usernameField" alignment="CENTER_RIGHT" editable="false" prefWidth="100.0" text="username" />
             <Label text="IP-address:">
                <HBox.margin>
                   <Insets top="4.0" />

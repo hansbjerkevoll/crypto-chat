@@ -268,16 +268,16 @@ public class JoinServerController {
 	}
 	
 	private void loadSettings() {
-		String saveName = settings.getClient_name();
+		String saveName = settings.getUser_name();
 		String saveIP = settings.getIp_address();
 		serverIPField.setText(saveIP);
 		clientNameField.setText(saveName);
 		
-		if("".equals(saveName)) {
+		if("".equals(saveName) || saveName == null) {
 			Platform.runLater(() -> {
 				clientNameField.requestFocus();
 			});
-		} else if("".equals(saveIP)) {
+		} else if("".equals(saveIP) || saveIP == null) {
 			Platform.runLater(() -> {
 				serverIPField.requestFocus();
 			});

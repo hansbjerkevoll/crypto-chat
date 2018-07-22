@@ -5,25 +5,23 @@ public class Settings {
 	/*
 	 * General settings
 	 */
+	private String user_name;
 	private String history_location;
 	
 	/**
 	 * Host Settings
 	 */
-	private String host_name;
 	private String server_name;
 	
 	/**
 	 * Join settings
 	 */
-	private String client_name;
 	private String ip_address;
 	
-	public Settings(String history_location, String host_name, String server_name, String join_name, String ip_address) {
+	public Settings(String user_name, String history_location, String server_name, String ip_address) {
+		this.user_name = user_name;
 		this.history_location = history_location;
-		this.host_name = host_name;
 		this.server_name = server_name;
-		this.client_name = join_name;
 		this.ip_address = ip_address;
 	}
 	
@@ -35,12 +33,12 @@ public class Settings {
 		this.history_location = history_location;
 	}
 	
-	public String getHost_name() {
-		return host_name;
+	public String getUser_name() {
+		return user_name;
 	}
 	
-	public void setHost_name(String host_name) {
-		this.host_name = host_name;
+	public void setUser_name(String user_name) {
+		this.user_name = user_name;
 	}
 	
 	public String getServer_name() {
@@ -49,14 +47,6 @@ public class Settings {
 	
 	public void setServer_name(String server_name) {
 		this.server_name = server_name;
-	}
-	
-	public String getClient_name() {
-		return client_name;
-	}
-	
-	public void setClient_name(String client_name) {
-		this.client_name = client_name;
 	}
 	
 	public String getIp_address() {

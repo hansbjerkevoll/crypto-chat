@@ -64,13 +64,14 @@ import javafx.util.Duration;
 
 public class ChatHostController {
 	
-	@FXML TextField serverIPField, serverPortField, serverShownPassword;
+	@FXML TextField usernameField, serverIPField, serverPortField, serverShownPassword;
 	@FXML PasswordField serverHiddenPassword;
 	@FXML MenuItem changeRoomButton, saveHistoryButton, closeServerButton;
 	@FXML Label serverNameLabel, serverRoomLabel;
 	@FXML TableView<ObservableClient> tableviewClients;
 	@FXML TableColumn<ObservableClient, String> tablecolumnName;
 	@FXML TableColumn<ObservableClient, String> tablecolumnIP;
+	@FXML TableColumn<ObservableClient, String> tablecolumnStatus;
 	@FXML ListView<String> listviewUpdates;
 	@FXML Button kickButton, muteButton;
 	@FXML HBox lobbyHBox;
@@ -114,50 +115,6 @@ public class ChatHostController {
 	
 	public void initialize() {
 		
-		tableviewClients.getSelectionModel().selectedItemProperty().addListener((obs, oldv, newv) -> {
-			if(newv == null) {
-				kickButton.setDisable(true);
-				muteButton.setDisable(true);
-				muteButton.setText("Mute/Unmute client");
-			} else {
-				kickButton.setDisable(false);
-				muteButton.setDisable(false);
-				muteButton.setText(newv.isMuted() ? "Unmute client" : "Mute client");
-			}
-		});
-		
-		kickButton.setOnAction(ae -> {
-			ObservableClient client = tableviewClients.getSelectionModel().getSelectedItem();
-			if(client == null) {
-				return;
-			}
-			Optional<ButtonType> result = Alerter.confirmation("Kick client?", "Are you sure you want to kick " + client.getName() + " (" + client.getIP() + ")?");
-			if(result.get() == ButtonType.OK) {
-				newUpdate(client.getName() + " (" + client.getIP() + ") was kicked by the host.");
-				removeClient(client);
-				client.kick(aes);
-				client.disconnect();
-			}
-		});
-		
-		muteButton.setOnAction(ae -> {
-			ObservableClient client = tableviewClients.getSelectionModel().getSelectedItem();
-			if(client == null) {
-				return;
-			}
-			Optional<ButtonType> result = Alerter.confirmation("Mute client?", "Are you sure you want to mute " + client.getName() + " (" + client.getIP() + ")?");
-			if(result.get() == ButtonType.OK) {
-				// Unmute client
-				if(client.isMuted()) {
-					newUpdate(client.getName() + " (" + client.getIP() + ") was unmuted by the host.");
-					client.toggle_mute(false, aes);
-				} else {
-					newUpdate(client.getName() + " (" + client.getIP() + ") was muted by the host.");
-					client.toggle_mute(true, aes);
-				}
-			}
-		});
-		
 		settings = SettingsFactory.getSettings();
 		
 		if(settings != null) {
@@ -165,6 +122,7 @@ public class ChatHostController {
 			directoryPath = historyLocation == null || "".equals(historyLocation) ? null : historyLocation;
 		}
 		
+		usernameField.setText(hostName);
 		serverIPField.setText(getExternalIP());
 		serverPortField.setText(Integer.toString(serverSocket.getLocalPort()));
 		serverHiddenPassword.setText(serverPassword);
@@ -187,6 +145,7 @@ public class ChatHostController {
 		tableviewClients.setItems(clients);
 		tablecolumnName.setCellValueFactory(new PropertyValueFactory<>("name"));
 		tablecolumnIP.setCellValueFactory(new PropertyValueFactory<>("ip_address"));
+		tablecolumnStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
 		
 		serverHiddenPassword.setOnMouseEntered(me -> {
 			serverHiddenPassword.setVisible(false);
@@ -280,6 +239,50 @@ public class ChatHostController {
 			e.consume();
 			if (closeServer() && mainMenuScene != null) {
 				myStage.close();
+			}
+		});
+		
+		tableviewClients.getSelectionModel().selectedItemProperty().addListener((obs, oldv, newv) -> {
+			if(newv == null) {
+				kickButton.setDisable(true);
+				muteButton.setDisable(true);
+				muteButton.setText("Mute/Unmute client");
+			} else {
+				kickButton.setDisable(false);
+				muteButton.setDisable(false);
+				muteButton.setText(newv.isMuted() ? "Unmute client" : "Mute client");
+			}
+		});
+		
+		kickButton.setOnAction(ae -> {
+			ObservableClient client = tableviewClients.getSelectionModel().getSelectedItem();
+			if(client == null) {
+				return;
+			}
+			Optional<ButtonType> result = Alerter.confirmation("Kick client?", "Are you sure you want to kick " + client.getName() + " (" + client.getIP() + ")?");
+			if(result.get() == ButtonType.OK) {
+				newUpdate(client.getName() + " (" + client.getIP() + ") was kicked by the host.");
+				removeClient(client);
+				client.kick(aes);
+				client.disconnect();
+			}
+		});
+		
+		muteButton.setOnAction(ae -> {
+			ObservableClient client = tableviewClients.getSelectionModel().getSelectedItem();
+			if(client == null) {
+				return;
+			}
+			Optional<ButtonType> result = Alerter.confirmation("Mute client?", "Are you sure you want to mute " + client.getName() + " (" + client.getIP() + ")?");
+			if(result.get() == ButtonType.OK) {
+				// Unmute client
+				if(client.isMuted()) {
+					newUpdate(client.getName() + " (" + client.getIP() + ") was unmuted by the host.");
+					client.toggle_mute(false, aes);
+				} else {
+					newUpdate(client.getName() + " (" + client.getIP() + ") was muted by the host.");
+					client.toggle_mute(true, aes);
+				}
 			}
 		});
 		
@@ -397,6 +400,7 @@ public class ChatHostController {
 	
 	private void newUpdate(String updateText) {
 		listviewUpdates.getItems().add(updateText);
+		listviewUpdates.scrollTo(listviewUpdates.getItems().size() - 1);
 	}
 	
 	public void sendNewTextMessage(String name, String message, long timestamp) {

@@ -247,18 +247,18 @@ public class HostServerController {
 	}
 	
 	private void loadSettings() {
-		String saveName = settings.getHost_name();
+		String saveName = settings.getUser_name();
 		String saveServerName = settings.getServer_name();
 		String historyLocation = settings.getHistory_location();
 		serverNameField.setText(saveServerName);
 		hostNameField.setText(saveName);
 		directoryPath = historyLocation == null || "".equals(historyLocation) ? null : historyLocation;
 		
-		if("".equals(saveName)) {
+		if("".equals(saveName) || saveName == null) {
 			Platform.runLater(() -> {
 				hostNameField.requestFocus();
 			});
-		} else if("".equals(saveServerName)) {
+		} else if("".equals(saveServerName) || saveServerName == null) {
 			Platform.runLater(() -> {
 				serverNameField.requestFocus();
 			});

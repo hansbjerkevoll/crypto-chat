@@ -28,6 +28,12 @@
                         <Label style="-fx-font-weight: bold;" text="General settings:" />
                         <VBox spacing="2.0">
                            <children>
+                              <Label text="User name:" />
+                              <TextField fx:id="userNameField" />
+                           </children>
+                        </VBox>
+                        <VBox spacing="2.0">
+                           <children>
                               <Label text="Chat history location:" />
                               <HBox spacing="5.0">
                                  <children>
@@ -48,12 +54,6 @@
                         <Label style="-fx-font-weight: bold;" text="Default Host Server Settings:" />
                         <VBox spacing="2.0">
                            <children>
-                              <Label text="Host name:" />
-                              <TextField fx:id="hostNameField" />
-                           </children>
-                        </VBox>
-                        <VBox spacing="2.0">
-                           <children>
                               <Label text="Server name:" />
                               <TextField fx:id="serverNameField" />
                            </children>
@@ -63,12 +63,6 @@
                   <VBox spacing="5.0">
                      <children>
                         <Label style="-fx-font-weight: bold;" text="Default Join Server Settings:" />
-                        <VBox spacing="2.0">
-                           <children>
-                              <Label text="Client name:" />
-                              <TextField fx:id="clientNameField" />
-                           </children>
-                        </VBox>
                         <VBox spacing="2.0">
                            <children>
                               <Label text="IP-address:" />

@@ -14,6 +14,7 @@ public class ObservableClient {
 	
 	private StringProperty name = new SimpleStringProperty();
 	private StringProperty ip_address = new SimpleStringProperty();
+	private StringProperty status = new SimpleStringProperty();
 	
 	private boolean isMuted = false;
 
@@ -21,6 +22,7 @@ public class ObservableClient {
 		this.client = client;
 		this.name.setValue(client.getName());
 		this.ip_address.setValue(client.getIP());
+		this.status.setValue("Connected");
 	}
 	
 	public void sendJSONMessage(String json, AES aes) {
@@ -52,6 +54,7 @@ public class ObservableClient {
 	}
 	
 	public void toggle_mute(boolean mute, AES aes) {
+		this.status.set(mute ? "Muted" : "Connected");
 		MuteClient mc = new MuteClient(mute);
 		String json = new Gson().toJson(mc);
 		this.client.sendMessageToClient(json, aes);
@@ -74,6 +77,10 @@ public class ObservableClient {
 		return this.ip_address;
 	}
 	
+	public StringProperty statusProperty() {
+		return this.status;
+	}
+	
 	public void setName(String name) {
 		this.name.set(name);
 		this.client.setName(name);
@@ -85,6 +92,10 @@ public class ObservableClient {
 	
 	public String getIP() {
 		return this.ip_address.get();
+	}
+	
+	public String getStatus() {
+		return this.status.get();
 	}
 	
 }

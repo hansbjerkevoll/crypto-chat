@@ -26,7 +26,7 @@ public class SettingsController {
 	private Settings current_settings;
 	
 	@FXML Button loadChatButton, saveButton, restoreButton, backButton;
-	@FXML TextField chatLocationField, hostNameField, serverNameField, clientNameField, ipField;
+	@FXML TextField userNameField, chatLocationField, serverNameField, ipField;
 	
 	private boolean changed_settings = false;
 	
@@ -41,10 +41,9 @@ public class SettingsController {
 		current_settings = SettingsFactory.getSettings();
 		
 		if(current_settings != null) {
+			userNameField.setText(current_settings.getUser_name());
 			chatLocationField.setText(current_settings.getHistory_location() == null ? "" : current_settings.getHistory_location());
-			hostNameField.setText(current_settings.getHost_name());
 			serverNameField.setText(current_settings.getServer_name());
-			clientNameField.setText(current_settings.getClient_name());
 			ipField.setText(current_settings.getIp_address());
 		}
 		
@@ -65,13 +64,12 @@ public class SettingsController {
 		});
 		
 		restoreButton.setOnAction(ae -> {
-			Optional<ButtonType> result = Alerter.confirmation("Restore settings?", "Are you sure you want to restore your settings to their default values?"
+			Optional<ButtonType> result = Alerter.confirmation("Restore settings?", "Are you sure you want to restore your settings to their default values? "
 					+ "This will delete all changes you have made.");
 			if(result.get() == ButtonType.OK) {
+				userNameField.setText("");
 				chatLocationField.setText("");
-				hostNameField.setText("");
 				serverNameField.setText("");
-				clientNameField.setText("");
 				ipField.setText("");
 				saveSettings();
 			}
@@ -82,7 +80,7 @@ public class SettingsController {
 				ObservableList<ButtonType> buttons = FXCollections.observableArrayList();
 				buttons.add(ButtonType.YES);
 				buttons.add(ButtonType.NO);
-				Optional<ButtonType> result = Alerter.confirmation("Save settings?", "The settings have been changed, to you want save the changes?", buttons);
+				Optional<ButtonType> result = Alerter.confirmation("Save settings?", "The settings have been changed, do you want save the changes?", buttons);
 				if(result.get() == ButtonType.YES) {
 					saveSettings();
 				} 
@@ -99,7 +97,7 @@ public class SettingsController {
 				ObservableList<ButtonType> buttons = FXCollections.observableArrayList();
 				buttons.add(ButtonType.YES);
 				buttons.add(ButtonType.NO);
-				Optional<ButtonType> result = Alerter.confirmation("Save settings?", "The settings have been changed, to you want save the changes?", buttons);
+				Optional<ButtonType> result = Alerter.confirmation("Save settings?", "The settings have been changed, do you want save the changes?", buttons);
 				if(result.get() == ButtonType.YES) {
 					saveSettings();
 				} 
@@ -110,22 +108,20 @@ public class SettingsController {
 		ControllerFunctions.buttonActionEnter(saveButton);
 		ControllerFunctions.buttonActionEnter(backButton);
 		
+		enableSave(userNameField);
 		enableSave(chatLocationField);
-		enableSave(hostNameField);
 		enableSave(serverNameField);
-		enableSave(clientNameField);
 		enableSave(ipField);
 		
 	}
 	
 	private boolean saveSettings() {
+		String user_name = userNameField.getText();
 		String history_location = chatLocationField.getText();
-		String host_name = hostNameField.getText();
 		String server_name = serverNameField.getText();
-		String client_name = clientNameField.getText();
 		String ip_address = ipField.getText();
 		
-		Settings settings = new Settings(history_location, host_name, server_name, client_name, ip_address);
+		Settings settings = new Settings(user_name, history_location, server_name, ip_address);
 		
 		try {
 			SettingsFactory.saveSettingsLocalFile(settings);

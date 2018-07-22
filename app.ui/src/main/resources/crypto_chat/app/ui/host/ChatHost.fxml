@@ -18,7 +18,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="750.0" prefWidth="950.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<VBox prefHeight="750.0" prefWidth="950.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <MenuBar>
         <menus>
@@ -44,6 +44,12 @@
       </MenuBar>
       <HBox spacing="10.0">
          <children>
+            <Label text="Username:">
+               <HBox.margin>
+                  <Insets top="4.0" />
+               </HBox.margin>
+            </Label>
+            <TextField fx:id="usernameField" alignment="CENTER_RIGHT" editable="false" prefWidth="100.0" text="username" />
             <Label text="External IP-address:">
                <HBox.margin>
                   <Insets top="4.0" />
@@ -103,6 +109,7 @@
                                 <columns>
                                   <TableColumn fx:id="tablecolumnName" prefWidth="75.0" text="Name" />
                                   <TableColumn fx:id="tablecolumnIP" prefWidth="75.0" text="IP-address" />
+                                    <TableColumn fx:id="tablecolumnStatus" prefWidth="75.0" text="Status" />
                                 </columns>
                                  <columnResizePolicy>
                                     <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

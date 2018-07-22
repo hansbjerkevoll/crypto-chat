@@ -55,7 +55,7 @@ public class ChatClientController {
 	private ArrayList<String> sentMessages = new ArrayList<>();
 	private int sm_index = -1;
 	
-	@FXML TextField serverIPField, serverPortField, serverHiddenPassword, serverShownPassword; 
+	@FXML TextField usernameField, serverIPField, serverPortField, serverHiddenPassword, serverShownPassword; 
 	@FXML Label serverNameLabel;
 	@FXML ScrollPane chatRoomScroll;
 	@FXML TextArea chatMessageArea;
@@ -88,6 +88,7 @@ public class ChatClientController {
 			directoryPath = historyLocation == null || "".equals(historyLocation) ? null : historyLocation;
 		}
 		
+		usernameField.setText(clientName);
 		serverIPField.setText(ip_address);
 		serverPortField.setText(port);
 		serverHiddenPassword.setText(serverPassword);
@@ -211,6 +212,7 @@ public class ChatClientController {
 		Thread t = new Thread(socketHandler, "ClientSocketThread");
 		t.start();
 		Threads.THREADS.add(t);
+		
 	}
 	
 	public void gotMessageFromServer() {

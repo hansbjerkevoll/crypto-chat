@@ -32,7 +32,7 @@
                <children>
                   <VBox spacing="5.0">
                      <children>
-                        <Label text="Client name:" />
+                        <Label text="Username:" />
                         <TextField fx:id="clientNameField" />
                      </children>
                   </VBox>

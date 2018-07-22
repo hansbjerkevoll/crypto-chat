@@ -18,18 +18,16 @@ public class SettingsFactory {
 	 * General Settings
 	 */
 	private static final String KEY_HISTORY_LOCATION = "history_location";
+	private static final String KEY_USER_NAME = "user_name";
 	
 	/**
 	 * Host Settings
 	 */
-	private static final String KEY_HOST_NAME = "host_name";
 	private static final String KEY_SERVER_NAME = "server_name";
 	
 	/**
 	 * Join settings
 	 */
-	
-	private static final String KEY_CLIENT_NAME = "client_name";
 	private static final String KEY_IP_ADDRESS = "ip_address";
 	
 	
@@ -46,11 +44,10 @@ public class SettingsFactory {
 			try (InputStream is = new FileInputStream(settingsFile)) {
 				p.load(is);
 				String history_location = p.getProperty(KEY_HISTORY_LOCATION);
-				String host_name = p.getProperty(KEY_HOST_NAME);
+				String user_name = p.getProperty(KEY_USER_NAME);
 				String server_name = p.getProperty(KEY_SERVER_NAME);
-				String client_name = p.getProperty(KEY_CLIENT_NAME);
 				String ip_address = p.getProperty(KEY_IP_ADDRESS);
-				settings = new Settings(history_location, host_name, server_name,  client_name, ip_address);
+				settings = new Settings(user_name, history_location, server_name, ip_address);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -73,10 +70,9 @@ public class SettingsFactory {
 		
 		try (FileOutputStream fos = new FileOutputStream(logincredFile)){
 			Properties p = new Properties();
+			p.setProperty(KEY_USER_NAME, settings.getUser_name());
 			p.setProperty(KEY_HISTORY_LOCATION, settings.getHistory_location());
-			p.setProperty(KEY_HOST_NAME, settings.getHost_name());
 			p.setProperty(KEY_SERVER_NAME, settings.getServer_name());
-			p.setProperty(KEY_CLIENT_NAME, settings.getClient_name());
 			p.setProperty(KEY_IP_ADDRESS, settings.getIp_address());
 			
 			p.store(fos, " Crypto Chat Settings:");
