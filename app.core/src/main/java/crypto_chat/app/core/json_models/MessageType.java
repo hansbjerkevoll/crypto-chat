@@ -6,6 +6,8 @@ public enum MessageType {
 	CONNECTION_REQUEST,
 	CONNECTION_RESPONSE,
 	CONNECTION_CLOSED,
+	KICKED,
+	MUTED,
 	
 	// Chat Messages
 	TEXT_MESSAGE,

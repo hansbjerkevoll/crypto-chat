@@ -123,4 +123,8 @@ public class ClientSocketHandler implements Runnable {
 		disconnected = true;
 	}
 	
+	public boolean isDisconnected() {
+		return this.disconnected;
+	}
+	
 }

@@ -14,6 +14,8 @@ public class ObservableClient {
 	
 	private StringProperty name = new SimpleStringProperty();
 	private StringProperty ip_address = new SimpleStringProperty();
+	
+	private boolean isMuted = false;
 
 	public ObservableClient(ClientThread client) {
 		this.client = client;
@@ -41,6 +43,27 @@ public class ObservableClient {
 		ChatMessageFile fm = new ChatMessageFile(clientName, file, timestamp);
 		String json = new Gson().toJson(fm);
 		this.client.sendMessageToClient(json, aes);
+	}
+	
+	public void kick(AES aes) {
+		KickClient kc = new KickClient();
+		String json = new Gson().toJson(kc);
+		this.client.sendMessageToClient(json, aes);
+	}
+	
+	public void toggle_mute(boolean mute, AES aes) {
+		MuteClient mc = new MuteClient(mute);
+		String json = new Gson().toJson(mc);
+		this.client.sendMessageToClient(json, aes);
+		isMuted = mute;
+	}
+	
+	public boolean isMuted() {
+		return this.isMuted;
+	}
+	
+	public void disconnect() {
+		this.client.disconnectClient();
 	}
 	
 	public StringProperty nameProperty() {

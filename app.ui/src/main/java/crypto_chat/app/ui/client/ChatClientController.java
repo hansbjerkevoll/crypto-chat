@@ -122,7 +122,11 @@ public class ChatClientController {
 					long timestamp = System.currentTimeMillis();
 					sendChatTextMessageToServer(message, timestamp);
 					ChatFunctions.newTextMessage(chatRoom, clientName, message, timestamp);
-					if(!sentMessages.get(0).equals(message)) sentMessages.add(0, message);
+					if(sentMessages.size() > 0) {
+						if(!sentMessages.get(0).equals(message)) sentMessages.add(0, message);
+					} else {
+						sentMessages.add(0, message);
+					}
 					sm_index = -1;
 					TimedTask.runLater(new Duration(30), () -> {
 						chatRoomScroll.setVvalue(1.0);
@@ -228,6 +232,32 @@ public class ChatClientController {
 						chatRoomScroll.setVvalue(1.0);
 					});	
 					break;
+				case KICKED:
+					serverNameLabel.setText("You have been kick from the server, and will return to the main menu in 5 seconds");
+					serverNameLabel.setStyle("-fx-text-fill:Red");
+					socketHandler.disconnect();
+					chatMessageArea.setDisable(true);
+					TimedTask.runLater(new Duration(5000), () -> {
+						myStage.setOnCloseRequest(null);
+						myStage.setScene(mainMenuScene);
+					});
+					break;
+				case MUTED:
+					MuteClient mc = gson.fromJson(jsonElement, MuteClient.class);
+					if(mc.getIsMuted()) {
+						serverNameLabel.setText("You have been muted by the host");
+						serverNameLabel.setStyle("-fx-text-fill:Red");
+						chatMessageArea.setDisable(true);
+					} else {
+						serverNameLabel.setText("You have been unmuted by the host");
+						serverNameLabel.setStyle("-fx-text-fill:Green");
+						chatMessageArea.setDisable(false);
+						TimedTask.runLater(new Duration(5000), () -> {
+							serverNameLabel.setText(serverName);
+							serverNameLabel.setStyle("-fx-text-fill:Black");
+						});
+					}
+					break;
 				case CONNECTION_CLOSED:
 					serverNameLabel.setText("The server was closed by the host");
 					serverNameLabel.setStyle("-fx-text-fill:Red");
@@ -252,6 +282,9 @@ public class ChatClientController {
 	}
 	
 	private boolean leaveServer() {
+		if(socketHandler.isDisconnected()) {
+			return true;
+		}
 		Optional<ButtonType> result = Alerter.confirmation("Leave server?", "Are you sure you wanna leave the server?");
 		if(result.get() == ButtonType.OK) {
 			ConnectionClosed cc = new ConnectionClosed();

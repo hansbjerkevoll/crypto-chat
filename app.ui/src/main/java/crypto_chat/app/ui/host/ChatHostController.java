@@ -42,6 +42,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -71,6 +72,7 @@ public class ChatHostController {
 	@FXML TableColumn<ObservableClient, String> tablecolumnName;
 	@FXML TableColumn<ObservableClient, String> tablecolumnIP;
 	@FXML ListView<String> listviewUpdates;
+	@FXML Button kickButton, muteButton;
 	@FXML HBox lobbyHBox;
 	@FXML VBox chatRoom, chatVBox;
 	@FXML ScrollPane chatRoomScroll;
@@ -94,9 +96,7 @@ public class ChatHostController {
 	
 	private ObservableList<ObservableClient> clients = FXCollections.observableArrayList();
 	private ArrayList<String> clientNames = new ArrayList<>();
-	private ArrayList<String> chatHistory = new ArrayList<>();
-	
-	
+	private ArrayList<String> chatHistory = new ArrayList<>();	
 	
 	public ChatHostController(Stage stage, ServerSocket serverSocket, String hostName, String serverName, String serverPassword) {
 		this.myStage = stage;
@@ -113,6 +113,50 @@ public class ChatHostController {
 	}
 	
 	public void initialize() {
+		
+		tableviewClients.getSelectionModel().selectedItemProperty().addListener((obs, oldv, newv) -> {
+			if(newv == null) {
+				kickButton.setDisable(true);
+				muteButton.setDisable(true);
+				muteButton.setText("Mute/Unmute client");
+			} else {
+				kickButton.setDisable(false);
+				muteButton.setDisable(false);
+				muteButton.setText(newv.isMuted() ? "Unmute client" : "Mute client");
+			}
+		});
+		
+		kickButton.setOnAction(ae -> {
+			ObservableClient client = tableviewClients.getSelectionModel().getSelectedItem();
+			if(client == null) {
+				return;
+			}
+			Optional<ButtonType> result = Alerter.confirmation("Kick client?", "Are you sure you want to kick " + client.getName() + " (" + client.getIP() + ")?");
+			if(result.get() == ButtonType.OK) {
+				newUpdate(client.getName() + " (" + client.getIP() + ") was kicked by the host.");
+				removeClient(client);
+				client.kick(aes);
+				client.disconnect();
+			}
+		});
+		
+		muteButton.setOnAction(ae -> {
+			ObservableClient client = tableviewClients.getSelectionModel().getSelectedItem();
+			if(client == null) {
+				return;
+			}
+			Optional<ButtonType> result = Alerter.confirmation("Mute client?", "Are you sure you want to mute " + client.getName() + " (" + client.getIP() + ")?");
+			if(result.get() == ButtonType.OK) {
+				// Unmute client
+				if(client.isMuted()) {
+					newUpdate(client.getName() + " (" + client.getIP() + ") was unmuted by the host.");
+					client.toggle_mute(false, aes);
+				} else {
+					newUpdate(client.getName() + " (" + client.getIP() + ") was muted by the host.");
+					client.toggle_mute(true, aes);
+				}
+			}
+		});
 		
 		settings = SettingsFactory.getSettings();
 		
@@ -177,8 +221,12 @@ public class ChatHostController {
 					chatMessageArea.positionCaret(chatMessageArea.getText().length());
 				} else if(!message.equals("")) {
 					long timestamp = System.currentTimeMillis();
-					ChatFunctions.newTextMessage(chatRoom, hostName, message, timestamp);
-					sentMessages.add(0, message);
+					ChatFunctions.newTextMessage(chatRoom, hostName, message, timestamp);					
+					if(sentMessages.size() > 0) {
+						if(!sentMessages.get(0).equals(message)) sentMessages.add(0, message);
+					} else {
+						sentMessages.add(0, message);
+					}
 					sm_index = -1;
 					TimedTask.runLater(new Duration(30), () -> {
 						chatRoomScroll.setVvalue(1.0);
@@ -283,9 +331,10 @@ public class ChatHostController {
 					forwardChatMessage(msg, cm.getSender());
 					break;
 				case CONNECTION_CLOSED:
-					removeClient(clientThread.getObservableClient());
-					clientNames.remove(clientThread.getName());
-					clientThread.disconnectClient();
+					ObservableClient disconnected_client = clientThread.getObservableClient();
+					newUpdate(disconnected_client.getName() + " (" + disconnected_client.getIP() + ") " +  "disconnected.");
+					removeClient(disconnected_client);
+					disconnected_client.disconnect();
 					break;
 				case CONNECTION_REQUEST:
 					ClientConnectionRequest request = gson.fromJson(jsonElement, ClientConnectionRequest.class);
@@ -337,8 +386,11 @@ public class ChatHostController {
 			if(!clients.contains(client)) {
 				return;
 			}
-			newUpdate(client.getName() + " (" + client.getIP() + ") " +  "disconnected.");
 			clients.remove(client);
+			if(!clientNames.contains(client.getName())) {
+				return;
+			}
+			clientNames.remove(client.getName());
 		});
 		
 	}
