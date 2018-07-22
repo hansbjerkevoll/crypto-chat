@@ -5,9 +5,13 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.ServerSocket;
 import java.net.URL;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.Scanner;
+
+import javax.xml.bind.DatatypeConverter;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -21,6 +25,10 @@ import crypto_chat.app.core.json_models.json_msg.ChatMessageText;
 import crypto_chat.app.core.json_models.json_msg.ClientConnectionRequest;
 import crypto_chat.app.core.json_models.json_msg.ClientConnectionResponse;
 import crypto_chat.app.core.json_models.json_msg.ConnectionClosed;
+import crypto_chat.app.core.security.AES;
+import crypto_chat.app.core.security.SHA_512;
+import crypto_chat.app.core.settings.Settings;
+import crypto_chat.app.core.settings.SettingsFactory;
 import crypto_chat.app.core.util.Alerter;
 import crypto_chat.app.core.util.ChatHistory;
 import crypto_chat.app.core.util.GetPackageHeader;
@@ -71,8 +79,15 @@ public class ChatHostController {
 	private Stage myStage;
 	private Scene mainMenuScene;
 	
+	private AES aes;
+	private Settings settings;
+	private String directoryPath;
+	
 	private ServerSocket serverSocket;
-	private String hostName, serverName, serverPassword;
+	private String hostName, serverName, serverPassword, serverPasswordHash;
+	
+	private ArrayList<String> sentMessages = new ArrayList<>();
+	private int sm_index = -1;
 	
 	private ChatServer chatServer;
 	private Thread chatServerThread;
@@ -81,15 +96,30 @@ public class ChatHostController {
 	private ArrayList<String> clientNames = new ArrayList<>();
 	private ArrayList<String> chatHistory = new ArrayList<>();
 	
+	
+	
 	public ChatHostController(Stage stage, ServerSocket serverSocket, String hostName, String serverName, String serverPassword) {
 		this.myStage = stage;
 		this.serverSocket = serverSocket;
 		this.hostName = hostName;
 		this.serverName = serverName;
 		this.serverPassword = serverPassword;
+		try {
+			this.serverPasswordHash = SHA_512.generateHashedPassword_SHA_512(serverPassword, null);
+			this.aes = new AES(Arrays.copyOfRange(serverPasswordHash.getBytes(), 0, 48));
+		} catch (NoSuchAlgorithmException e) {
+			// Do nothing, will never occur
+		}
 	}
 	
 	public void initialize() {
+		
+		settings = SettingsFactory.getSettings();
+		
+		if(settings != null) {
+			String historyLocation = settings.getHistory_location();
+			directoryPath = historyLocation == null || "".equals(historyLocation) ? null : historyLocation;
+		}
 		
 		serverIPField.setText(getExternalIP());
 		serverPortField.setText(Integer.toString(serverSocket.getLocalPort()));
@@ -148,12 +178,26 @@ public class ChatHostController {
 				} else if(!message.equals("")) {
 					long timestamp = System.currentTimeMillis();
 					ChatFunctions.newTextMessage(chatRoom, hostName, message, timestamp);
+					sentMessages.add(0, message);
+					sm_index = -1;
 					TimedTask.runLater(new Duration(30), () -> {
 						chatRoomScroll.setVvalue(1.0);
 					});
 					sendNewTextMessage(hostName, message, timestamp);
 					chatMessageArea.clear();
 				}	
+			} else if(ke.getCode() == KeyCode.UP) {
+				if(sentMessages.size() > sm_index + 1) {
+					sm_index++;
+					chatMessageArea.setText(sentMessages.get(sm_index));
+					chatMessageArea.positionCaret(chatMessageArea.getText().length());
+				}
+			} else if(ke.getCode() == KeyCode.DOWN) {
+				if(sm_index > 0) {
+					sm_index--;
+					chatMessageArea.setText(sentMessages.get(sm_index));
+					chatMessageArea.positionCaret(chatMessageArea.getText().length());
+				}
 			}
 		});
 		
@@ -170,6 +214,9 @@ public class ChatHostController {
 			ExtensionFilter filter = new ExtensionFilter("Text File", "*.txt");
 			filechooser.getExtensionFilters().add(filter);
 			filechooser.setSelectedExtensionFilter(filter);
+			if(directoryPath != null) {
+				filechooser.setInitialDirectory(new File(directoryPath));
+			}
 			File file = filechooser.showSaveDialog(myStage);
 			if(file != null) {
 				try {
@@ -218,6 +265,9 @@ public class ChatHostController {
 		RunOnJavaFX.run(() -> {
 			String msg;
 			while ((msg = clientThread.getMessage()) != null) {
+				// Decrypt msg
+				msg = new String(aes.triple_AES_decrypt(DatatypeConverter.parseHexBinary(msg)));
+				
 				// Decode JSON
 				JsonElement jsonElement = new JsonParser().parse(msg);
 				MessageType type = GetPackageHeader.getPackageHeader(jsonElement);
@@ -234,6 +284,7 @@ public class ChatHostController {
 					break;
 				case CONNECTION_CLOSED:
 					removeClient(clientThread.getObservableClient());
+					clientNames.remove(clientThread.getName());
 					clientThread.disconnectClient();
 					break;
 				case CONNECTION_REQUEST:
@@ -241,7 +292,7 @@ public class ChatHostController {
 					clientThread.setName(request.getClientName());
 					boolean accepted = false;
 					boolean available_name = checkNameAvailability(request.getClientName());
-					boolean correct_pwd = request.getHashedPassword().equals(serverPassword);
+					boolean correct_pwd = request.getHashedPassword().equals(serverPasswordHash);
 					String response_msg = "Access denied";
 					
 					if(!available_name) {
@@ -256,6 +307,7 @@ public class ChatHostController {
 						ObservableClient client = new ObservableClient(clientThread);
 						clientThread.setObservableClient(client);
 						clients.add(client);
+						clientNames.add(request.getClientName());
 						String newConnection = request.getClientName() + " (" + clientThread.getIP() + ") connected.";
 						newUpdate(newConnection);
 					} else {
@@ -268,7 +320,7 @@ public class ChatHostController {
 						response.setChatMessageLog(chatHistory);
 					}
 					String json = new Gson().toJson(response);
-					clientThread.sendMessageToClient(json);
+					clientThread.sendMessageToClient(json, aes);
 					break;
 				default:
 					System.out.println("Unknown message type received: " + type);
@@ -285,14 +337,14 @@ public class ChatHostController {
 			if(!clients.contains(client)) {
 				return;
 			}
-			newUpdate(client.getName() + " disconnected.");
+			newUpdate(client.getName() + " (" + client.getIP() + ") " +  "disconnected.");
 			clients.remove(client);
 		});
 		
 	}
 	
 	private void newUpdate(String updateText) {
-		listviewUpdates.getItems().add(0, updateText);
+		listviewUpdates.getItems().add(updateText);
 	}
 	
 	public void sendNewTextMessage(String name, String message, long timestamp) {
@@ -305,14 +357,14 @@ public class ChatHostController {
 	public void forwardChatMessage(String msg, String sender_name) {
 		for(ObservableClient client : clients) {
 			if(!sender_name.equals(client.getName())) {
-				client.sendJSONMessage(msg);
+				client.sendJSONMessage(msg, aes);
 			}
 		}
 	}
 	
 	public void sendJSONToAllClients(String json) {
 		for(ObservableClient client : clients) {
-			client.sendJSONMessage(json);
+			client.sendJSONMessage(json, aes);
 		}
 	}
 	

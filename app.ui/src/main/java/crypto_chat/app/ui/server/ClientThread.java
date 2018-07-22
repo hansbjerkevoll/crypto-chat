@@ -10,7 +10,10 @@ import java.nio.charset.Charset;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
+import javax.xml.bind.DatatypeConverter;
+
 import crypto_chat.app.core.globals.Threads;
+import crypto_chat.app.core.security.AES;
 import crypto_chat.app.ui.host.ChatHostController;
 
 public class ClientThread implements Runnable {
@@ -111,9 +114,9 @@ public class ClientThread implements Runnable {
 		return clientSocket.getInetAddress().getHostAddress();
 	}
 
-	public void sendMessageToClient(String msg) {
+	public void sendMessageToClient(String msg, AES aes) {
 		synchronized (this) {
-			messageToClient.offer(msg);
+			messageToClient.offer(DatatypeConverter.printHexBinary(aes.triple_AES_encrypt(msg.getBytes())));
 			this.notifyAll();
 		}
 	}

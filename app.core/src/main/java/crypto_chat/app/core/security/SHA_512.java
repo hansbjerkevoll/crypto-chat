@@ -72,12 +72,14 @@ public class SHA_512 {
 	 *         to find a provider for the SHA-512 algorithm
 	 * @throws NoSuchAlgorithmException 
 	 */
-	private static String generateHashedPassword_SHA_512(String passwordToHash, byte[] salt) throws NoSuchAlgorithmException {
+	public static String generateHashedPassword_SHA_512(String passwordToHash, byte[] salt) throws NoSuchAlgorithmException {
 
 		String generatedPassword = null;
 
 		MessageDigest md = MessageDigest.getInstance("SHA-512");
-		md.update(salt);
+		if(salt != null) {
+			md.update(salt);
+		}
 		byte[] bytes = md.digest(passwordToHash.getBytes());
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < bytes.length; i++) {

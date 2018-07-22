@@ -6,7 +6,11 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.nio.charset.Charset;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
+
+import javax.xml.bind.DatatypeConverter;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -16,6 +20,8 @@ import crypto_chat.app.core.globals.*;
 import crypto_chat.app.core.json_models.MessageType;
 import crypto_chat.app.core.json_models.json_msg.ClientConnectionRequest;
 import crypto_chat.app.core.json_models.json_msg.ClientConnectionResponse;
+import crypto_chat.app.core.security.AES;
+import crypto_chat.app.core.security.SHA_512;
 import crypto_chat.app.core.settings.Settings;
 import crypto_chat.app.core.settings.SettingsFactory;
 import crypto_chat.app.core.util.Alerter;
@@ -186,11 +192,15 @@ public class JoinServerController {
 		try {
 			PrintStream toServer = new PrintStream(serverSocket.getOutputStream(), true, "UTF-8");
 			BufferedReader fromServer = new BufferedReader(new InputStreamReader(serverSocket.getInputStream(), Charset.forName("UTF-8")));
-			ClientConnectionRequest cr = new ClientConnectionRequest(clientNameField.getText(), serverPasswordField.getText());
+			String passwordHash = SHA_512.generateHashedPassword_SHA_512(serverPasswordField.getText(), null);
+			ClientConnectionRequest cr = new ClientConnectionRequest(clientNameField.getText(), passwordHash);
 			String json = new Gson().toJson(cr);
-			toServer.println(json);
+			AES aes = new AES(Arrays.copyOfRange(passwordHash.getBytes(), 0, 48));
+			byte[] json_encoded = aes.triple_AES_encrypt(json.getBytes());
+			toServer.println(DatatypeConverter.printHexBinary(json_encoded));
 			
-			String server_response = fromServer.readLine();
+			String server_response = new String(aes.triple_AES_decrypt(DatatypeConverter.parseHexBinary(fromServer.readLine())));
+			
 			JsonElement jsonElement = new JsonParser().parse(server_response);
 			MessageType type = GetPackageHeader.getPackageHeader(jsonElement);
 			Gson gson = new Gson();
@@ -205,7 +215,7 @@ public class JoinServerController {
 					return false;
 				}
 			}
-		} catch (IOException e) {
+		} catch (IOException | NoSuchAlgorithmException e) {
 			Alerter.exception("Failed to connect", "Something unexpected went wrong...", e);
 			return false;
 		} 
@@ -217,7 +227,7 @@ public class JoinServerController {
 	private void initializeChatUI(Socket serversocket) {
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("ChatClient.fxml"));
 		ClientSocketHandler socketHandler = new ClientSocketHandler(serversocket);
-		ChatClientController controller = new ChatClientController(myStage, socketHandler, clientNameField.getText(), givenServername, serverPasswordField.getText());
+		ChatClientController controller = new ChatClientController(myStage, socketHandler, clientNameField.getText(), givenServername, serverIPField.getText(), serverPortField.getText() ,serverPasswordField.getText());
 		controller.setChatMessageLog(givenChatHistory);
 		controller.setMainMenuScene(mainMenuScene);
 		loader.setController(controller);

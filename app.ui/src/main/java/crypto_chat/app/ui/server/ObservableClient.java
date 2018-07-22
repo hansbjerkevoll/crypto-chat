@@ -4,6 +4,7 @@ import java.io.File;
 import com.google.gson.Gson;
 
 import crypto_chat.app.core.json_models.json_msg.*;
+import crypto_chat.app.core.security.AES;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
@@ -20,26 +21,26 @@ public class ObservableClient {
 		this.ip_address.setValue(client.getIP());
 	}
 	
-	public void sendJSONMessage(String json) {
-		this.client.sendMessageToClient(json);
+	public void sendJSONMessage(String json, AES aes) {
+		this.client.sendMessageToClient(json, aes);
 	}
 	
-	public void sendChatTextMessage(String clientName, String message, long timestamp) {
+	public void sendChatTextMessage(String clientName, String message, long timestamp, AES aes) {
 		ChatMessageText cm = new ChatMessageText(clientName, message, timestamp);
 		String json = new Gson().toJson(cm);
-		this.client.sendMessageToClient(json);
+		this.client.sendMessageToClient(json, aes);
 	}
 	
-	public void sendChatImageMessage(String clientName, byte[] image_bytes, long timestamp) {
+	public void sendChatImageMessage(String clientName, byte[] image_bytes, long timestamp, AES aes) {
 		ChatMessageImage im = new ChatMessageImage(clientName, image_bytes, timestamp);
 		String json = new Gson().toJson(im);
-		this.client.sendMessageToClient(json);
+		this.client.sendMessageToClient(json, aes);
 	}
 	
-	public void sendChatFileMessage(String clientName, File file, long timestamp) {
+	public void sendChatFileMessage(String clientName, File file, long timestamp, AES aes) {
 		ChatMessageFile fm = new ChatMessageFile(clientName, file, timestamp);
 		String json = new Gson().toJson(fm);
-		this.client.sendMessageToClient(json);
+		this.client.sendMessageToClient(json, aes);
 	}
 	
 	public StringProperty nameProperty() {

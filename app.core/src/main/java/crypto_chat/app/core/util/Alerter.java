@@ -5,6 +5,7 @@ import java.io.StringWriter;
 import java.util.Optional;
 
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
@@ -132,6 +133,15 @@ public class Alerter {
     
     public static Optional<ButtonType> confirmation(String header, String message){
     	Alert alert = new Alert(AlertType.CONFIRMATION);
+        alert.setTitle("Confirmation Dialog");
+        alert.setHeaderText(header);
+        alert.setContentText(message);
+        return alert.showAndWait();
+    }
+    
+    public static Optional<ButtonType> confirmation(String header, String message, ObservableList<ButtonType> buttonTypes){
+    	Alert alert = new Alert(AlertType.CONFIRMATION);
+    	alert.getButtonTypes().setAll(buttonTypes);
         alert.setTitle("Confirmation Dialog");
         alert.setHeaderText(header);
         alert.setContentText(message);

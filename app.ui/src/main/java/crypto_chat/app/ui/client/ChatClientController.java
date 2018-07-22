@@ -3,18 +3,25 @@ package crypto_chat.app.ui.client;
 import crypto_chat.app.core.globals.*;
 import crypto_chat.app.core.json_models.MessageType;
 import crypto_chat.app.core.json_models.json_msg.*;
+import crypto_chat.app.core.security.AES;
+import crypto_chat.app.core.security.SHA_512;
+import crypto_chat.app.core.settings.Settings;
+import crypto_chat.app.core.settings.SettingsFactory;
 import crypto_chat.app.core.util.*;
 import crypto_chat.app.ui.server.ClientSocketHandler;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Optional;
+
+import javax.xml.bind.DatatypeConverter;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
@@ -36,9 +43,17 @@ public class ChatClientController {
 	private Stage myStage;
 	private Scene mainMenuScene;
 	
+	private AES aes;
+	private Settings settings;
+	private String directoryPath;
+	
 	private ClientSocketHandler socketHandler;
-	private String clientName, serverName, serverPassword;
+	private String clientName, serverName, ip_address, port, serverPassword, serverPasswordHash;
+	
 	private ArrayList<String> chatHistory;
+	
+	private ArrayList<String> sentMessages = new ArrayList<>();
+	private int sm_index = -1;
 	
 	@FXML TextField serverIPField, serverPortField, serverHiddenPassword, serverShownPassword; 
 	@FXML Label serverNameLabel;
@@ -47,18 +62,34 @@ public class ChatClientController {
 	@FXML VBox chatRoom;
 	@FXML MenuItem saveHistoryButton, leaveServerButton;
 	
-	public ChatClientController(Stage stage, ClientSocketHandler socketHandler, String clientName, String serverName, String serverPassword) {
+	public ChatClientController(Stage stage, ClientSocketHandler socketHandler, String clientName, String serverName, String ip_address, String port, String serverPassword) {
 		this.myStage = stage;
 		this.socketHandler = socketHandler;
 		this.socketHandler.setController(this);
 		this.clientName = clientName;
 		this.serverName = serverName;
+		this.ip_address = ip_address;
+		this.port = port;
 		this.serverPassword = serverPassword;
+		try {
+			this.serverPasswordHash = SHA_512.generateHashedPassword_SHA_512(serverPassword, null);
+			this.aes = new AES(Arrays.copyOfRange(serverPasswordHash.getBytes(), 0, 48));
+		} catch (NoSuchAlgorithmException e) {
+			// Do nothing, will never occur
+		}
 	}
 	
 	public void initialize() {
-		serverIPField.setText(socketHandler.getIP().toString());
-		serverPortField.setText(Integer.toString(socketHandler.getPort()));
+		
+		settings = SettingsFactory.getSettings();
+		
+		if(settings != null) {
+			String historyLocation = settings.getHistory_location();
+			directoryPath = historyLocation == null || "".equals(historyLocation) ? null : historyLocation;
+		}
+		
+		serverIPField.setText(ip_address);
+		serverPortField.setText(port);
 		serverHiddenPassword.setText(serverPassword);
 		serverShownPassword.setText(serverPassword);
 		serverNameLabel.setText(serverName);
@@ -91,11 +122,26 @@ public class ChatClientController {
 					long timestamp = System.currentTimeMillis();
 					sendChatTextMessageToServer(message, timestamp);
 					ChatFunctions.newTextMessage(chatRoom, clientName, message, timestamp);
+					if(!sentMessages.get(0).equals(message)) sentMessages.add(0, message);
+					sm_index = -1;
 					TimedTask.runLater(new Duration(30), () -> {
 						chatRoomScroll.setVvalue(1.0);
 					});	
 					chatMessageArea.clear();
 				}	
+			} else if(ke.getCode() == KeyCode.UP) {
+				if(sentMessages.size() > sm_index + 1) {
+					sm_index++;
+					chatMessageArea.setText(sentMessages.get(sm_index));
+					chatMessageArea.positionCaret(chatMessageArea.getText().length());
+				}
+			} else if(ke.getCode() == KeyCode.DOWN) {
+				System.out.println(sentMessages.size() + " " +  sm_index);
+				if(sm_index > 0) {
+					sm_index--;
+					chatMessageArea.setText(sentMessages.get(sm_index));
+					chatMessageArea.positionCaret(chatMessageArea.getText().length());
+				}
 			}
 		});
 		
@@ -119,6 +165,9 @@ public class ChatClientController {
 			ExtensionFilter filter = new ExtensionFilter("Text File", "*.txt");
 			filechooser.getExtensionFilters().add(filter);
 			filechooser.setSelectedExtensionFilter(filter);
+			if(directoryPath != null) {
+				filechooser.setInitialDirectory(new File(directoryPath));
+			}
 			File file = filechooser.showSaveDialog(myStage);
 			if(file != null) {
 				try {
@@ -164,6 +213,9 @@ public class ChatClientController {
 		RunOnJavaFX.run(() -> {
 			String msg;
 			while ((msg = socketHandler.getMessage()) != null) {
+				// Decrypt msg
+				msg= new String(aes.triple_AES_decrypt(DatatypeConverter.parseHexBinary(msg)));
+				
 				// Decode JSON
 				JsonElement jsonElement = new JsonParser().parse(msg);
 				MessageType type = GetPackageHeader.getPackageHeader(jsonElement);
@@ -192,7 +244,7 @@ public class ChatClientController {
 	public void sendChatTextMessageToServer(String message, long timestamp) {
 		ChatMessageText cm = new ChatMessageText(clientName, message, timestamp);
 		String json = new Gson().toJson(cm);
-		socketHandler.sendMessageToServer(json);
+		socketHandler.sendMessageToServer(json, aes);
 	}
 	
 	public void setChatMessageLog(ArrayList<String> chatMessageLog) {
@@ -204,7 +256,7 @@ public class ChatClientController {
 		if(result.get() == ButtonType.OK) {
 			ConnectionClosed cc = new ConnectionClosed();
 			String json = new Gson().toJson(cc);
-			socketHandler.sendMessageToServer(json);
+			socketHandler.sendMessageToServer(json, aes);
 			socketHandler.disconnect();
 			return true;
 		}

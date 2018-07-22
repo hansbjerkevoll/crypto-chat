@@ -8,6 +8,8 @@ import crypto_chat.app.core.globals.ControllerFunctions;
 import crypto_chat.app.core.settings.Settings;
 import crypto_chat.app.core.settings.SettingsFactory;
 import crypto_chat.app.core.util.Alerter;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -25,6 +27,8 @@ public class SettingsController {
 	
 	@FXML Button loadChatButton, saveButton, restoreButton, backButton;
 	@FXML TextField chatLocationField, hostNameField, serverNameField, clientNameField, ipField;
+	
+	private boolean changed_settings = false;
 	
 	public SettingsController(Stage stage) {
 		this.myStage = stage;
@@ -57,21 +61,7 @@ public class SettingsController {
 		});
 		
 		saveButton.setOnAction(ae -> {
-			String history_location = chatLocationField.getText();
-			String host_name = hostNameField.getText();
-			String server_name = serverNameField.getText();
-			String client_name = clientNameField.getText();
-			String ip_address = ipField.getText();
-			
-			Settings settings = new Settings(history_location, host_name, server_name, client_name, ip_address);
-			
-			try {
-				SettingsFactory.saveSettingsLocalFile(settings);
-				Alerter.info(null, "Settings have been saved");
-				saveButton.setDisable(true);
-			} catch (IOException e) {
-				Alerter.exception(null, "Failed to save settings...", e);
-			}
+			saveSettings();
 		});
 		
 		restoreButton.setOnAction(ae -> {
@@ -83,18 +73,38 @@ public class SettingsController {
 				serverNameField.setText("");
 				clientNameField.setText("");
 				ipField.setText("");
-				try {
-					SettingsFactory.saveSettingsLocalFile(new Settings("", "", "", "", ""));
-				} catch (IOException e) {
-					Alerter.exception(null, "Failed to save settings...", e);
-				}
+				saveSettings();
 			}
 		});
 		
 		backButton.setOnAction(ae -> {
+			if(changed_settings) {
+				ObservableList<ButtonType> buttons = FXCollections.observableArrayList();
+				buttons.add(ButtonType.YES);
+				buttons.add(ButtonType.NO);
+				Optional<ButtonType> result = Alerter.confirmation("Save settings?", "The settings have been changed, to you want save the changes?", buttons);
+				if(result.get() == ButtonType.YES) {
+					saveSettings();
+				} 
+			}
 			if (adminMenuScene != null) {
+				myStage.setOnCloseRequest(null);
 				((Stage) backButton.getScene().getWindow()).setScene(adminMenuScene);
 			}
+		});
+		
+		myStage.setOnCloseRequest(cr -> {
+			cr.consume();
+			if(changed_settings) {
+				ObservableList<ButtonType> buttons = FXCollections.observableArrayList();
+				buttons.add(ButtonType.YES);
+				buttons.add(ButtonType.NO);
+				Optional<ButtonType> result = Alerter.confirmation("Save settings?", "The settings have been changed, to you want save the changes?", buttons);
+				if(result.get() == ButtonType.YES) {
+					saveSettings();
+				} 
+			}
+			myStage.close();			
 		});
 		
 		ControllerFunctions.buttonActionEnter(saveButton);
@@ -108,10 +118,32 @@ public class SettingsController {
 		
 	}
 	
+	private boolean saveSettings() {
+		String history_location = chatLocationField.getText();
+		String host_name = hostNameField.getText();
+		String server_name = serverNameField.getText();
+		String client_name = clientNameField.getText();
+		String ip_address = ipField.getText();
+		
+		Settings settings = new Settings(history_location, host_name, server_name, client_name, ip_address);
+		
+		try {
+			SettingsFactory.saveSettingsLocalFile(settings);
+			Alerter.info(null, "Settings have been saved");
+			saveButton.setDisable(true);
+			changed_settings = false;
+			return true;
+		} catch (IOException e) {
+			Alerter.exception(null, "Failed to save settings...", e);
+		}
+		return false;
+	}
+	
 	private void enableSave(TextField field) {
 		field.textProperty().addListener((obs, oldv, newv) -> {
 			if(!newv.equals(oldv)) {
 				saveButton.setDisable(false);
+				changed_settings = true;
 			}
 		});
 	}

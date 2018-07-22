@@ -14,10 +14,8 @@ import javafx.stage.Stage;
 
 public class AdminMenuController {
 	
-	Stage myStage;
-	
+	Stage myStage;	
 	Scene mainMenuScene;
-	Scene settingsScene;
 	
 	@FXML Button settingsButton, portforwardButton, backButton;
 	
@@ -27,21 +25,15 @@ public class AdminMenuController {
 	
 	@FXML public void initialize() {
 		
-		ControllerFunctions.buttonActionEnter(settingsButton);
-		ControllerFunctions.buttonActionEnter(portforwardButton);
-		ControllerFunctions.buttonActionEnter(backButton);
-		
 		settingsButton.setOnAction(ae -> {
 			try {
-				if (settingsScene == null) {
-					URL location = getClass().getResource("settings/Settings.fxml");
-					FXMLLoader loader = new FXMLLoader(location);
-					SettingsController controller = new SettingsController(myStage);
-					controller.setAdminMenuScene(settingsButton.getScene());
-					loader.setController(controller);
-					Parent root = loader.load();
-					this.settingsScene = new Scene(root);
-				}
+				URL location = getClass().getResource("settings/Settings.fxml");
+				FXMLLoader loader = new FXMLLoader(location);
+				SettingsController controller = new SettingsController(myStage);
+				controller.setAdminMenuScene(settingsButton.getScene());
+				loader.setController(controller);
+				Parent root = loader.load();
+				Scene settingsScene = new Scene(root);
 				myStage.setScene(settingsScene);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -53,7 +45,10 @@ public class AdminMenuController {
 				((Stage) backButton.getScene().getWindow()).setScene(mainMenuScene);
 			}
 		});
-	
+
+		ControllerFunctions.buttonActionEnter(settingsButton);
+		ControllerFunctions.buttonActionEnter(portforwardButton);
+		ControllerFunctions.buttonActionEnter(backButton);
 	}
 	
 	public void setMainMenuScene(Scene scene) {

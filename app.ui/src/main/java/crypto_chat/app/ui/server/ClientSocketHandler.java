@@ -11,6 +11,9 @@ import java.nio.charset.Charset;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
+import javax.xml.bind.DatatypeConverter;
+
+import crypto_chat.app.core.security.AES;
 import crypto_chat.app.ui.client.ChatClientController;
 
 public class ClientSocketHandler implements Runnable {
@@ -51,7 +54,6 @@ public class ClientSocketHandler implements Runnable {
 					}
 					// Write to socket
 					while ((line = messageToServer.poll()) != null) {
-						System.out.println(line);
 						toServer.println(line);
 					}
 					if(disconnected) {
@@ -69,10 +71,10 @@ public class ClientSocketHandler implements Runnable {
 		stopStreams();
 	}
 	
-	public boolean sendMessageToServer(String message) {
+	public boolean sendMessageToServer(String message, AES aes) {
 		boolean didSend = false;
 		synchronized (this) {
-			didSend = messageToServer.offer(message);
+			didSend = messageToServer.offer(DatatypeConverter.printHexBinary(aes.triple_AES_encrypt(message.getBytes())));
 			this.notifyAll();
 		}
 		return didSend;
