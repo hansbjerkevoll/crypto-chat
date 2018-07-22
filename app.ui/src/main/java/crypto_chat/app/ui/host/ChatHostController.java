@@ -275,13 +275,14 @@ public class ChatHostController {
 			}
 			Optional<ButtonType> result = Alerter.confirmation("Mute client?", "Are you sure you want to mute " + client.getName() + " (" + client.getIP() + ")?");
 			if(result.get() == ButtonType.OK) {
-				// Unmute client
 				if(client.isMuted()) {
 					newUpdate(client.getName() + " (" + client.getIP() + ") was unmuted by the host.");
 					client.toggle_mute(false, aes);
+					muteButton.setText("Mute client");
 				} else {
 					newUpdate(client.getName() + " (" + client.getIP() + ") was muted by the host.");
 					client.toggle_mute(true, aes);
+					muteButton.setText("Unmute client");
 				}
 			}
 		});

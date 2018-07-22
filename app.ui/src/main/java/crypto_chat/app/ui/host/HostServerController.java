@@ -242,6 +242,7 @@ public class HostServerController {
 		serverPasswordField.setDisable(disable);
 		serverPortField.setDisable(portCheckbox.isSelected() ? true : disable);
 		portCheckbox.setDisable(disable);
+		loadChatButton.setDisable(disable);
 		hostButton.setDisable(disable);
 		cancelButton.setDisable(disable);
 	}
